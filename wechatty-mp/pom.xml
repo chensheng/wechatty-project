@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>space.chensheng.wechatty</groupId>
-    <artifactId>wechatty-parent</artifactId>
+    <artifactId>wechatty-project</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>wechatty-mp</artifactId>

@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>space.chensheng.wechatty</groupId>
-  <artifactId>wechatty-parent</artifactId>
+  <artifactId>wechatty-project</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>wechatty parent</name>
+  <name>wechatty project</name>
   <description>Wechatty is a framework with well encapsulated API to develop wechat media platform and enterprise platform.</description>
   <modules>
     <module>wechatty-common</module>
