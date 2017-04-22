@@ -48,3 +48,7 @@ Temporary Items
 .svn/entries
 
 target/
+wechatty-common/.classpath
+wechatty-common/.settings/org.eclipse.jdt.core.prefs
+*.classpath
+wechatty-mp/.settings/org.eclipse.jdt.core.prefs
