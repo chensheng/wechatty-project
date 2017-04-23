@@ -21,7 +21,7 @@ Wechattty Project是一个基于JAVAR的微信公众号（包括服务号和订�
 
 ### 配置
 
-新建配置文件wechat-mp.properties, 将该文件放在项目类路径下。比如maven项目，可将该文件放在`src/main/resources`目录下。一般的配置同容如下:
+新建配置文件wechat-mp.properties, 将该文件放在项目类路径下。比如maven项目，可将该文件放在`src/main/resources`目录下。一般的配置如下:
 ```
 token=thisIsTokenOfYourAccount
 aesKey=thisIsAesKeyOfYourAccount
@@ -54,3 +54,35 @@ poolingHttpSocketTimeoutMillis|socket超时毫秒数，默认10000
 poolingHttpConnectTimeoutMillis|连接到微信服务器超时毫秒数，默认10000
 poolingHttpConnectionRequestTimeoutMillis|从htttp连接池获取连接超时毫秒数，默认10000
 poolingHttpTcpNoDelay|是否开启tpcNoDelay,默认true
+
+###### access_token更新问题
+
+* 自动更新：如果开启了自动更新，则在因为access_token错误而导致请求微信接口失败的情况下，框架会自动更新access_token。
+* 定时更新：在应用中使用定时任务(比如quartz)来定时执行`space.chensheng.wechatty.mp.util.MpAccessTokenFetcher.getInstance().updateAccessToken()`，一般每1.5小时执行一次，因为access_token的过期时间为2小时。
+* 自动更新和定时更新可共存，如果多个线程并发执行更新access_token，只有一个线程会去请求微信服务器来更新access_token，其他线程会立即返回，不执行任何操作。
+
+###### access_token存取策略问题
+
+* Web应用单机部署：如果您的应用是单机部署，则可直接使用默认的策略，将access_token存储在内存中。
+* Web应用集群部署：如果您的应用是集群部署，则要实现自己的access_token存取策略，将access_token存放在集群共享的媒介（比如数据库）来达到access_token中控管理的目的。实现完自己的策略类后，要在wechat-mp.properties中添加配置`accessTokenStrategyClass=your.package.name.YourAccessTokenStrategyName`。以下是一个accesss_token数据库存取的策略：
+```java
+import space.chensheng.wechatty.common.http.AccessTokenStrategy;
+
+//因为这个策略类的实例化不是通过Spring来管理的，所以在这个类中不能使用Autowired来注入bean，要通过ApplicationContext#getBean方法来获取。
+public class DatabaseAccessTokenStrategy implements AccessTokenStrategy{
+	
+  //将access_token存到数据库中去
+	@Override
+	public void doSave(String accessToken) { 
+      TokenService tokenService = ApplicationContextUtil.getApplicationContext().getBean(TokenService.class);
+			tokenService.doSave(accessToken);
+	}
+
+  //从数据库中取出access_token
+	@Override
+	public String doQuery() {
+	    TokenService tokenService = ApplicationContextUtil.getApplicationContext().getBean(TokenService.class);
+			return tokenService.doQuery();
+	}
+}
+```
