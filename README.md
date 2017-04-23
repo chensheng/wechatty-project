@@ -209,3 +209,42 @@ MusicReplyMessage|音乐回复
 NewsReplyMessage|图文回复
 VideoReplyMessage|视频回复
 VoiceReplyMessage|语音回复
+
+### 发送消息
+
+公众号可以主动发送消息给用户，包括群发消息发送和客服消息发送，都统一通过`space.chensheng.wechatty.mp.message.MpMessageSender`来发送。
+
+###### 群发消息
+
+```
+TextMassMessage message = new TextMassMessage();
+message.setIsToAll(true);
+message.setContent("群发消息测试");
+MpMessageSender.getInstance().send(message, 3);
+```
+群发消息类型|说明
+-----|-----
+TextMassMessage|文本群发
+ImageMassMessage|图片群发
+MpnewsMassMessage|微信内图文群发
+MpvideoMassMessage|视频群发
+VoiceMassMessage|语音群发
+WxcardMassMessage|微信卡券群发
+
+###### 客服消息
+
+```
+TextCsMessage message = new TextCsMessage();
+message.setToUser("thisIsUserOpenId");
+message.setContent("客服消息测试 \n 212");
+MpMessageSender.getInstance().send(message, 3);
+```
+客服消息类型|说明
+-----|-----
+TextCsMessage|文本客服
+ImageCsMessage|图片客服
+MpnewsCsMessage|微信内图文客服
+NewsCsMessage|外部图文客服
+VideoCsMessage|视频客服
+VoiceCsMessage|语音客服
+WxcardCsMessage|微信卡券客服
