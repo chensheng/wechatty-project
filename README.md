@@ -128,7 +128,7 @@ public class CallbackController extends BaseController{
 }
 ```
 
-###### 接收回调消息请求
+###### 接收回调请求
 
 验证完开启回调请求后，回调模式就真正开启了。如果用户发了个消息给公从号，微信服务器会向回调URL发送一个POST请求，将消息转发到这个URL上，开发者需要在Web应用中处理这个请求，以下是一个SpringMVC的例子（和前面验证开启回调的例子在一个controller中）：
 ```
@@ -153,7 +153,7 @@ public class CallbackController extends BaseController{
 }
 ```
 
-###### 各种类型回调消息的监听
+###### 回调消息的监听
 
 开发者可以通过继承`space.chensheng.wechatty.common.message.MessageListener`来监听特定类型的消息，为了让监听生效，还需要将其添加到开头提到的Spring bean配置文件MpMessageDispatcher的msgListeners中去。以下是一个监听用户发送的文本消息的例子:
 
@@ -179,3 +179,22 @@ public class TextMessageListener extends MessageListener<TextInboundMessage> {
     }
 }
 ```
+
+###### 可监听的消息类型
+
+消息|说明
+---|---
+TextInboundMessage|文本消息 
+ImageInboundMessage|图片消息
+LinkInboundMessage|跳转图文消息
+LocationInboundMessage|共享位置消息
+ShortVideoInboundMessage|小视频消息
+VideoInboundMessage|视频消息
+VoiceInboundMessage|语音消息
+ClickEventMessage|点击普通菜单消息
+ViewEventMessage|点击跳转链接菜单消息
+LocationEventMessage|位置事件消息
+SubscribeEventMessage|用户关注公众号消息
+UnsubscribeEventMessage|用记取消关注公众号消息
+ScanEventMessage|用户扫描二维码消息
+MassSendJobFinishEventMessage|群发消息发送完成报告
