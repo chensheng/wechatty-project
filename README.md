@@ -68,7 +68,7 @@ poolingHttpTcpNoDelay|是否开启tpcNoDelay,默认true
 ###### access_token存取策略问题
 
 * Web应用单机部署：如果您的应用是单机部署，则可直接使用默认的策略，将access_token存储在内存中。
-* Web应用集群部署：如果您的应用是集群部署，则要实现自己的access_token存取策略，将access_token存放在集群共享的媒介（比如数据库）来达到access_token中控管理的目的。实现完自己的策略类后，要在wechat-mp.properties中添加配置`accessTokenStrategyClass=your.package.name.YourAccessTokenStrategyName`。以下是一个accesss_token数据库存取的策略：
+* Web应用集群部署：如果您的应用是集群部署，则要实现自己的access_token存取策略，将access_token存放在集群共享的媒介（比如数据库）来达到access_token中控管理的目的。实现完自己的策略类后，要在wechat-mp.properties中添加配置`accessTokenStrategyClass=your.package.name.YourAccessTokenStrategy`。以下是一个accesss_token数据库存取的策略：
 ```java
 import space.chensheng.wechatty.common.http.AccessTokenStrategy;
 
