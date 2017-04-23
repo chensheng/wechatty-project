@@ -119,7 +119,7 @@ public class CallbackController extends BaseController{
     
     //验证请求，并回复字符串
     @RequestMapping(value = "/callback", method = RequestMethod.GET)
-    public String verify(String msg_signature, String timestamp, String nonce, String echostr) throws ServiceLevelException {
+    public String verify(String msg_signature, String timestamp, String nonce, String echostr) {
         String reply = MpCallbackModeVerifier.verify(msg_signature, timestamp, nonce, echostr);
 	return reply;
     }
@@ -145,10 +145,37 @@ public class CallbackController extends BaseController{
     
     //接收回调消息，并回复相应xml消息
     @RequestMapping(value = "/callback", method = RequestMethod.POST)
-    public String verify(String msg_signature, String timestamp, String nonce) throws ServiceLevelException {
+    public String verify(String msg_signature, String timestamp, String nonce) {
         //postBody是请求体内容，String格式，开发者可以请求中解析
         String replyXml = messageDispatcher.dispatch(msg_signature(), timestamp, nonce, postBody);
 	return replyXml;
+    }
+}
+```
+
+###### 各种类型回调消息的监听
+
+开发者可以通过继承`space.chensheng.wechatty.common.message.MessageListener`来监听特定类型的消息，为了让监听生效，还需要将其添加到开头提到的Spring bean配置文件MpMessageDispatcher的msgListeners中去。以下是一个监听用户发送的文本消息的例子:
+
+```
+public class TextMessageListener extends MessageListener<TextInboundMessage> {
+
+    @Override
+    protected ReplyMessage onMessage(TextInboundMessage message) {
+        String content = message.getContent();
+	
+	//根据消息内容来回复用户
+	if ("1".equals(content)) {
+	    TextReplyMessage replyMsg = new TextReplyMessage();
+	    replyMsg.setContent("this is reply message content");
+	    replyMsg.setFromUserName(message.getToUserName());
+	    replyMsg.setToUserName(message.getFromUserName());
+	    replyMsg.setCreateTime(System.currentTimeMillis());
+	    return replyMsg;
+	}
+	
+	//返回null表示不回复用户
+	return null;
     }
 }
 ```
