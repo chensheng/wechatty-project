@@ -198,3 +198,14 @@ SubscribeEventMessage|用户关注公众号消息
 UnsubscribeEventMessage|用记取消关注公众号消息
 ScanEventMessage|用户扫描二维码消息
 MassSendJobFinishEventMessage|群发消息发送完成报告
+
+###### 可回复的消息类型
+
+消息|说明
+---|---
+TextReplyMessage|文本回复
+ImageReplyMessage|图片回复
+MusicReplyMessage|音乐回复
+NewsReplyMessage|图文回复
+VideoReplyMessage|视频回复
+VoiceReplyMessage|语音回复
