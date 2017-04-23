@@ -4,10 +4,10 @@ Wechattty Project是一个基于JAVAR的微信公众号（包括服务号和订�
 
 ## 简单使用教程
 
-* 引入依赖
-* 配置
+* [引入依赖](#import)
+* [配置](#config)
 
-### 引入依赖
+### <span id="import">引入依赖</span>
 
 这里使用maven来引入依赖。
 ```
@@ -19,7 +19,7 @@ Wechattty Project是一个基于JAVAR的微信公众号（包括服务号和订�
 
 ```
 
-### 配置
+### <span id="config">配置</span>
 
 新建配置文件wechat-mp.properties, 将该文件放在项目类路径下。比如maven项目，可将该文件放在`src/main/resources`目录下。一般的配置如下:
 ```
