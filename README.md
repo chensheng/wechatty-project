@@ -277,3 +277,22 @@ ImageTemporaryMedia|临时图片
 ThumbTemporaryMedia|临时缩略图
 VideoTemporaryMedia|临时视频
 VoiceTemporaryMedia|临时语音
+
+###### 查询素材
+
+查询素材操作通过工具类`space.chensheng.wechatty.mp.material.MaterialQuery`和`space.chensheng.wechatty.mp.material.MaterialQuery`完成。
+
+* 查询素材的数量信息：`MaterialQuery.count()`
+* 查询图文素材：`MaterialQuery.listNews(int offset, int count)`
+* 查询其他素材：`MaterialQuery.listMedia(MediaType mediaType, int offset, int count)`
+* 根据mediaId查找图文：`MaterialFinder.findNews(String mediaId)`
+* 根据mediaId查找永久视频：`MaterialFinder.findPermanentVideo(String mediaId)`
+* 根据mediaId查找临时视频：`MaterialFinder.findTemporaryVideo(String mediaId)`
+* 根据mediaId下载永久素材：`MaterialFinder.downloadPermanentMedia(String mediaId, String saveDir, String fileName)`
+* 根据mediaId下载临时素材：`MaterialFinder.downloadTemporaryMedia(String mediaId, String saveDir, String fileName)`
+
+###### 删除素材
+
+删除素材操作通过工具类`space.chensheng.wechatty.mp.material.MaterialDeleter`完成。
+
+* 根据mediaId删除素材：`MaterialDeleter.delete(String mediaId)`
