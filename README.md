@@ -68,7 +68,8 @@ poolingHttpTcpNoDelay|是否开启tpcNoDelay,默认true
 ```java
 import space.chensheng.wechatty.common.http.AccessTokenStrategy;
 
-//因为这个策略类的实例化不是通过Spring来管理的，所以在这个类中不能使用Autowired来注入bean，要通过ApplicationContext#getBean方法来获取。
+//因为这个策略类的实例化不是通过Spring来管理的，所以在这个类中不能使用Autowired来注入bean，
+//要通过ApplicationContext#getBean方法来获取。
 public class DatabaseAccessTokenStrategy implements AccessTokenStrategy{
 	
   //将access_token存到数据库中去
