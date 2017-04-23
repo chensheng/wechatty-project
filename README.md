@@ -72,18 +72,20 @@ import space.chensheng.wechatty.common.http.AccessTokenStrategy;
 //要通过ApplicationContext#getBean方法来获取。
 public class DatabaseAccessTokenStrategy implements AccessTokenStrategy{
 	
-  //将access_token存到数据库中去
-	@Override
-	public void doSave(String accessToken) { 
-      TokenService tokenService = ApplicationContextUtil.getApplicationContext().getBean(TokenService.class);
-			tokenService.doSave(accessToken);
-	}
-
-  //从数据库中取出access_token
-	@Override
-	public String doQuery() {
-	    TokenService tokenService = ApplicationContextUtil.getApplicationContext().getBean(TokenService.class);
-			return tokenService.doQuery();
-	}
+    //将access_token存到数据库中去
+    @Override
+    public void doSave(String accessToken) {
+        TokenService tokenService = ApplicationContextUtil
+	    .getApplicationContext().getBean(TokenService.class);
+	tokenService.doSave(accessToken);
+    }
+    
+    //从数据库中取出access_token
+    @Override
+    public String doQuery() {
+        TokenService tokenService = ApplicationContextUtil
+	    .getApplicationContext().getBean(TokenService.class);
+	return tokenService.doQuery();
+    }
 }
 ```
