@@ -4,10 +4,12 @@ Wechattty Project是一个基于JAVAR的微信公众号（包括服务号和订�
 
 ## 简单使用教程
 
-* [引入依赖](#import)
-* [配置](#config)
+* [引入依赖](#引入依赖)
+* [配置](#配置)
+* [接收消息](#接收消息)
+* [发送消息](#发送消息)
 
-### <span id="import">引入依赖</span>
+### 引入依赖
 
 这里使用maven来引入依赖。
 ```
@@ -19,7 +21,7 @@ Wechattty Project是一个基于JAVAR的微信公众号（包括服务号和订�
 
 ```
 
-### <span id="config">配置</span>
+### 配置
 
 新建配置文件wechat-mp.properties, 将该文件放在项目类路径下。比如maven项目，可将该文件放在`src/main/resources`目录下。一般的配置如下:
 ```
@@ -90,7 +92,7 @@ public class DatabaseAccessTokenStrategy implements AccessTokenStrategy{
 }
 ```
 
-### 回调消息
+### 接收消息
 
 这里假设Web应用的bean是通过Spring来管理的。首先要在Spring配置文件中(比如applicationContext.xml)添加如下信息(关于message listener会在后面介绍):
 ```
@@ -128,7 +130,7 @@ public class CallbackController extends BaseController{
 }
 ```
 
-###### 接收回调请求
+###### 消息回调请求处理
 
 验证完开启回调请求后，回调模式就真正开启了。如果用户发了个消息给公从号，微信服务器会向回调URL发送一个POST请求，将消息转发到这个URL上，开发者需要在Web应用中处理这个请求，以下是一个SpringMVC的例子（和前面验证开启回调的例子在一个controller中）：
 ```
