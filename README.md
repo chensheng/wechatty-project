@@ -105,4 +105,50 @@ public class DatabaseAccessTokenStrategy implements AccessTokenStrategy{
 </bean>
 ```
 
+###### 验证微信服务器的开启回调请求
 
+如果你已经在微信公众号后台设置了回调URL，微信服务器会向这个URL发送一个GET请求来验证，开发者需要在Web应用中处理这个请求。以下是一个SpringMVC的验证例子：
+```
+@RestController
+@RequestMapping(value = "/wechat-mp")
+public class CallbackController extends BaseController{
+
+    //注入前面配置的回调处理器
+    @Autowired
+    private MpMessageDispatcher messageDispatcher;
+    
+    //验证请求，并回复字符串
+    @RequestMapping(value = "/callback", method = RequestMethod.GET)
+    public String verify(String msg_signature, String timestamp, String nonce, String echostr) throws ServiceLevelException {
+        String reply = MpCallbackModeVerifier.verify(msg_signature, timestamp, nonce, echostr);
+	return reply;
+    }
+    
+    ...
+}
+```
+
+###### 接收回调消息请求
+
+验证完开启回调请求后，回调模式就真正开启了。如果用户发了个消息给公从号，微信服务器会向回调URL发送一个POST请求，将消息转发到这个URL上，开发者需要在Web应用中处理这个请求，以下是一个SpringMVC的例子（和前面验证开启回调的例子在一个controller中）：
+```
+@RestController
+@RequestMapping(value = "/wechat-mp")
+public class CallbackController extends BaseController{
+
+    //注入前面配置的回调处理器
+    @Autowired
+    private MpMessageDispatcher messageDispatcher;
+    
+    //这里省略验证开启回调的方法
+    ...
+    
+    //接收回调消息，并回复相应xml消息
+    @RequestMapping(value = "/callback", method = RequestMethod.POST)
+    public String verify(String msg_signature, String timestamp, String nonce) throws ServiceLevelException {
+        //postBody是请求体内容，String格式，开发者可以请求中解析
+        String replyXml = messageDispatcher.dispatch(msg_signature(), timestamp, nonce, postBody);
+	return replyXml;
+    }
+}
+```
