@@ -134,7 +134,7 @@ public class CallbackController extends BaseController{
 
 ###### 消息回调请求处理
 
-验证完开启回调请求后，回调模式就真正开启了。如果用户发了个消息给公从号，微信服务器会向回调URL发送一个POST请求，将消息转发到这个URL上，开发者需要在Web应用中处理这个请求，以下是一个SpringMVC的例子（和前面验证开启回调的例子在一个controller中）：
+验证完开启回调请求后，回调模式就真正开启了。如果用户发了个消息给公众号，微信服务器会向回调URL发送一个POST请求，将消息转发到这个URL上，开发者需要在Web应用中处理这个请求，以下是一个SpringMVC的例子（和前面验证开启回调的例子在一个controller中）：
 ```
 @RestController
 @RequestMapping(value = "/wechat-mp")
