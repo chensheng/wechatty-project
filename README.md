@@ -9,7 +9,7 @@ Wechattty Project是一个基于JAVAR的微信公众号（包括服务号和订�
 
 ### 引入依赖
 
-这里使用MAVEN来引入依赖。
+这里使用maven来引入依赖。
 ```
 <dependency>
   <groupId>space.chensheng.wechatty</groupId>
@@ -18,3 +18,23 @@ Wechattty Project是一个基于JAVAR的微信公众号（包括服务号和订�
 </dependency>
 
 ```
+
+### 配置
+
+新建配置文件wechat-mp.properties, 将该文件放在项目类路径下。比如maven项目，可将该文件放在`src/main/resources`目录下。一般的配置同容如下:
+```
+token=thisIsTokenOfYourAccount
+aesKey=thisIsAesKeyOfYourAccount
+appId=thisIsYourAppId
+appSecret=thisIdYourAppSecret
+```
+
+###### 配置参数说明
+
+必填参数|说明
+-----|-----
+token|公众号的token，可在公众号后台查看.
+aesKey|加密用的key， 可在公众号后台查看.
+appId|公众号appId，可在公众号后台查看。
+appSecret|公众号的appSecret，可在公众号后台查看。
+
