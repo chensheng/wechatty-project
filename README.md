@@ -89,3 +89,20 @@ public class DatabaseAccessTokenStrategy implements AccessTokenStrategy{
     }
 }
 ```
+
+### 回调消息
+
+这里假设Web应用的bean是通过Spring来管理的。首先要在Spring配置文件中(比如applicationContext.xml)添加如下信息(关于message listener会在后面介绍):
+```
+<bean class="space.chensheng.wechatty.mp.message.MpMessageDispatcher">
+  <constructor-arg name="msgListeners" >
+    <list>
+      <bean class="your.message.listener.TextMessageListener"></bean>
+      <bean class="your.message.listener.SubscribeEventListener"></bean>
+      <bean class="your.message.listener.listener.UnsubscribeEventListener"></bean>
+    </list>
+  </constructor-arg>
+</bean>
+```
+
+
