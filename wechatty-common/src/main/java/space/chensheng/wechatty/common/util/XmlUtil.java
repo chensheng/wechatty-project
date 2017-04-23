@@ -20,10 +20,8 @@ import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.Xpp3Driver;
 
 /**
- * 
+ * Use XStream to convert between XML and POJO.
  * @author sheng.chen
- * @date 2016年6月20日
- * @Description: Use XStream to convert between XML and POJO.
  */
 public class XmlUtil {
 	private static final Logger logger = LoggerFactory.getLogger(XmlUtil.class);

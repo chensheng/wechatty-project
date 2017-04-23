@@ -2,17 +2,18 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
+  
   <parent>
     <groupId>space.chensheng.wechatty</groupId>
     <artifactId>wechatty-project</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
   </parent>
   <artifactId>wechatty-common</artifactId>
-  <name>wechatty-common</name>
+  
+  <name>${project.parent.groupId}:${project.artifactId}</name>
   <url>http://www.chensheng.space</url>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+  <description>wechatty-common contains common codes to develop wechat media platform and enterprise platform</description>
+ 
   <dependencies>
     <dependency>
       <groupId>junit</groupId>

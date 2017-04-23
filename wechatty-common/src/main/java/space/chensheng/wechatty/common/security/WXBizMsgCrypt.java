@@ -40,8 +40,6 @@ public class WXBizMsgCrypt {
 	 * @param token 公众平台上，开发者设置的token
 	 * @param encodingAesKey 公众平台上，开发者设置的EncodingAESKey
 	 * @param appId 
-	 * 
-	 * @throws AesException 执行失败，请查看该异常的错误码和具体的错误信息
 	 */
 	public WXBizMsgCrypt(String token, String encodingAesKey, String appId) {
 		this.token = token;

@@ -7,8 +7,6 @@ import space.chensheng.wechatty.common.message.MessageType;
 /**
  * customer service outbound message
  * @author sheng.chen
- * @date 2017年3月30日
- * @Description:TODO
  */
 public abstract class CsOutboundMessage extends MpOutboundMessage {
 
