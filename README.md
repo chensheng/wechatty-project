@@ -38,3 +38,19 @@ aesKey|加密用的key， 可在公众号后台查看.
 appId|公众号appId，可在公众号后台查看。
 appSecret|公众号的appSecret，可在公众号后台查看。
 
+可选参数|说明
+-----|-----
+enableCryptedMode|是否开启回调加密模式，默认true。如果开启则要下载[JCE无限制权限策略文件](http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html),覆盖jdk中的相关文件，具体可查看[微信常见错误举例](https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1419318482&lang=zh_CN)。
+autoUpdateAccessToken|出现access_token相关错误时是否自动更新access_token，默认false，应用可自己通过定时任务来更新，后面将详细介绍。
+accessTokenStrategyClass|access_token存取策略，默认是space.chensheng.wechatty.common.http.MemoryAccessTokenStrategy，将access_token存在内存中，应用可实现自己的存取策略，比如存在数据库中，后面将详细介绍。
+poolingHttpProxyEnable|是否通过代理服务器给微信服务器必请求，默认false
+poolingHttpProxyHostname|代理服务器的hostname，比如www.chensheng.space
+poolingHttpProxyPort|代理服务器端口
+poolingHttpProxyUsername|代理服务器用户名
+poolingHttpProxyPassword|代理服务器密码
+poolingHttpMaxPerRoute|http连接池每条链路最大并发连接数，默认为50
+poolingHttpMaxTotal|http连接池最大并发连接数，默认200
+poolingHttpSocketTimeoutMillis|socket超时毫秒数，默认10000
+poolingHttpConnectTimeoutMillis|连接到微信服务器超时毫秒数，默认10000
+poolingHttpConnectionRequestTimeoutMillis|从htttp连接池获取连接超时毫秒数，默认10000
+poolingHttpTcpNoDelay|是否开启tpcNoDelay,默认true
