@@ -9,6 +9,7 @@ Wechattty Project是一个基于JAVAR的微信公众号（包括服务号和订�
 * [接收消息](#接收消息)
 * [发送消息](#发送消息)
 * [素材管理](#素材管理)
+* [帐号管理](#帐号管理)
 
 ### 引入依赖
 
@@ -296,3 +297,13 @@ VoiceTemporaryMedia|临时语音
 删除素材操作通过工具类`space.chensheng.wechatty.mp.material.MaterialDeleter`完成。
 
 * 根据mediaId删除素材：`MaterialDeleter.delete(String mediaId)`
+
+### 帐号管理
+
+###### 生成带参数二维码
+
+生成带参数二维码通过工具类`space.chensheng.wechatty.mp.account.QRCodeCreater`完成。
+
+* 生成带参数临时二维码：`QRCodeCreater.createTemporary(int expireSeconds, int sceneId)`
+* 生成带整型参数永久二维码：`QRCodeCreater.createPermanent(int sceneId)`
+* 生成带字符串参数永久二维码：`QRCodeCreater.createPermanent(String sceneStr)`
