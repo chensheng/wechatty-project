@@ -258,10 +258,22 @@ WxcardCsMessage|微信卡券客服
 
 ###### 上传素材
 
-上传素材通过操作对应的素材类来完成，下面是一个上传图片的例子：
+上传素材通过操作对应的素材上传类来完成，下面是一个上传图片的例子：
 
 ```
 File image = new File("/this/is/image/path.jpg");
 ImagePermanentMedia material = new ImagePermanentMedia(image);
 UploadResponse resp = material.upload();
 ```
+素材上传类|说明
+-----|-----
+ImagePermanentMedia|永久图片
+ThumbPermanentMedia|永久缩略图
+VideoPermanentMedia|永久视频
+VoicePermanentMedia|永久语音
+PermanentNews|永久图文
+PermanentNewsImg|永久图文中的图片
+ImageTemporaryMedia|临时图片
+ThumbTemporaryMedia|临时缩略图
+VideoTemporaryMedia|临时视频
+VoiceTemporaryMedia|临时语音
