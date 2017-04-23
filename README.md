@@ -212,7 +212,7 @@ VoiceReplyMessage|语音回复
 
 ### 发送消息
 
-公众号可以主动发送消息给用户，包括群发消息发送和客服消息发送，都统一通过`space.chensheng.wechatty.mp.message.MpMessageSender`来发送。
+公众号可以主动发送消息给用户，包括群发消息和客服消息两大类型消息。所有消息统一使用`space.chensheng.wechatty.mp.message.MpMessageSender`来发送。
 
 ###### 群发消息
 
