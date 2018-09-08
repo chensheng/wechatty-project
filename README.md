@@ -1,15 +1,18 @@
 # Wechatty Project
 
-Wechattty Project是一个基于JAVA的微信公众号（包括服务号和订阅号）和微信企业号的开发框架，封装良好的API让开发者可以专注于业务逻辑的开发，提高开发效率。目前完成了微信公众号的部分功能，剩余功能将陆续完善，后面还将加入微信企业号的功能。
+Wechattty Project是一个基于JAVA的微信公众号（包括服务号和订阅号）和微信企业号的开发框架，封装良好的API让开发者可以专注于业务逻辑的开发，提高开发效率。
 
 ## 简单使用教程
 
 * [引入依赖](#引入依赖)
+* [初始化](#初始化)
 * [配置](#配置)
 * [接收消息](#接收消息)
 * [发送消息](#发送消息)
 * [素材管理](#素材管理)
 * [帐号管理](#帐号管理)
+* [微信授权](#微信授权)
+* [微信支付](#微信支付)
 
 ### 引入依赖
 
@@ -18,19 +21,69 @@ Wechattty Project是一个基于JAVA的微信公众号（包括服务号和订�
 <dependency>
   <groupId>space.chensheng.wechatty</groupId>
   <artifactId>wechatty-mp</artifactId>
-  <version>0.0.1</version>
+  <version>1.0.0</version>
 </dependency>
 
 ```
 
+### 初始化
+
+`MpAppContext`是公众号API的统一调用入口，使用`WechatMpBootstrap`对其进行初始化。
+```
+WechatMpBootstrap bootstrap = new WechatMpBootstrap();
+bootstrap.addMsgListener(new TextMessageListener());
+MpAppContext mpAppContext = bootstrap.build();
+```
+如果项目使用spring来管理，可实现一个`FactoryBean`来初始化`MpAppContext`，以便后续引用。
+```
+@Component
+public class MpAppContextFactoryBean implements FactoryBean<MpAppContext> {
+
+	@Override
+	public MpAppContext getObject() throws Exception {
+	    WechatMpBootstrap bootstrap = new WechatMpBootstrap();
+	    bootstrap.addMsgListener(new TextMessageListener());
+	    return bootstrap.build();
+	}
+
+	@Override
+	public Class<?> getObjectType() {
+	    return MpAppContext.class;
+	}
+
+	@Override
+	public boolean isSingleton() {
+	    return true;
+	}
+}
+```
+
 ### 配置
 
+配置方式有两种，一种是`配置文件`，另一种是 `JAVA代码配置`。其中`JAVA代码配置`的优先级高于`配置文件`。
+
+###### 配置文件
 新建配置文件wechat-mp.properties, 将该文件放在项目类路径下。比如maven项目，可将该文件放在`src/main/resources`目录下。一般的配置如下:
 ```
-token=thisIsTokenOfYourAccount
-aesKey=thisIsAesKeyOfYourAccount
+token=thisIsToken
+aesKey=thisIsAesKey
 appId=thisIsYourAppId
-appSecret=thisIdYourAppSecret
+appSecret=thisIsAppSecret
+```
+
+###### JAVA代码配置
+在`MpAppConetxt`初始化时，调用`WechatMpBootstrap`的`customizeWechatContext`方法来进行配置。
+```
+WechatMpBootstrap bootstrap = new WechatMpBootstrap();
+bootstrap.customizeWechatContext(new MpWechatContextCustomizer() {
+    @Override
+    public void customize(MpWechatContext wechatContext) {
+	wechatContext.setToken("thisIsToken");
+	wechatContext.setAesKey("thisIsAeskey");
+	wechatContext.setAppId("thisIsAppId");
+	wechatContext.setAppSecret("thisIsAppSecret");
+    }
+});
 ```
 
 ###### 配置参数说明
@@ -47,6 +100,11 @@ appSecret|公众号的appSecret，可在公众号后台查看。
 enableCryptedMode|是否开启回调加密模式，默认true。如果开启则要下载[JCE无限制权限策略文件](http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html),覆盖jdk中的相关文件，具体可查看[微信常见错误举例](https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1419318482&lang=zh_CN)。
 autoUpdateAccessToken|出现access_token相关错误时是否自动更新access_token，默认false，应用可自己通过定时任务来更新，后面将详细介绍。
 accessTokenStrategyClass|access_token存取策略，默认是space.chensheng.wechatty.common.http.MemoryAccessTokenStrategy，将access_token存在内存中，应用可实现自己的存取策略，比如存在数据库中，后面将详细介绍。
+payKey|微信支付key
+payCertFile|微信支付证书文件路径
+payCertPassword|微信支付证书密码
+payMchId|微信支付商户id
+payClientIp|调用支付的机器ip
 poolingHttpProxyEnable|是否通过代理服务器给微信服务器必请求，默认false
 poolingHttpProxyHostname|代理服务器的hostname，比如www.chensheng.space
 poolingHttpProxyPort|代理服务器端口
@@ -62,7 +120,7 @@ poolingHttpTcpNoDelay|是否开启tpcNoDelay,默认true
 ###### access_token更新问题
 
 * 自动更新：如果开启了自动更新，则在因为access_token错误而导致请求微信接口失败的情况下，框架会自动更新access_token。
-* 定时更新：在应用中使用定时任务(比如quartz)来定时执行`space.chensheng.wechatty.mp.util.MpAccessTokenFetcher.getInstance().updateAccessToken()`，一般每1.5小时执行一次，因为access_token的过期时间为2小时。
+* 定时更新：在应用中使用定时任务(比如quartz)来定时执行`mpAppContext.getAccessTokenFetcher().updateAccessToken()`，一般每1.5小时执行一次，因为access_token的过期时间为2小时。
 * 自动更新和定时更新可共存，如果多个线程并发执行更新access_token，只有一个线程会去请求微信服务器来更新access_token，其他线程会立即返回，不执行任何操作。
 
 ###### access_token存取策略问题
@@ -96,17 +154,12 @@ public class DatabaseAccessTokenStrategy implements AccessTokenStrategy{
 
 ### 接收消息
 
-这里假设Web应用的bean是通过Spring来管理的。首先要在Spring配置文件中(比如applicationContext.xml)添加如下信息(关于message listener会在后面介绍):
+在`MpAppContext`初始化时，通过`WechatMpBootstrap`添加消息监听器来接收消息(关于message listener会在后面介绍):
 ```
-<bean class="space.chensheng.wechatty.mp.message.MpMessageDispatcher">
-  <constructor-arg name="msgListeners" >
-    <list>
-      <bean class="your.message.listener.TextMessageListener"></bean>
-      <bean class="your.message.listener.SubscribeEventListener"></bean>
-      <bean class="your.message.listener.listener.UnsubscribeEventListener"></bean>
-    </list>
-  </constructor-arg>
-</bean>
+WechatMpBootstrap bootstrap = new WechatMpBootstrap();
+bootstrap.addMsgListener(new TextMessageListener());
+bootstrap.addMsgListener(new SubscribeEventListener());
+bootstrap.addMsgListener(new UnsubscribeEventListener());
 ```
 
 ###### 验证微信服务器的开启回调请求
@@ -117,18 +170,16 @@ public class DatabaseAccessTokenStrategy implements AccessTokenStrategy{
 @RequestMapping(value = "/wechat-mp")
 public class CallbackController extends BaseController{
 
-    //注入前面配置的回调处理器
-    @Autowired
-    private MpMessageDispatcher messageDispatcher;
+    @Autowired
+    private MpAppContext mpAppContext;
     
-    //验证请求，并回复字符串
-    @RequestMapping(value = "/callback", method = RequestMethod.GET)
+    //验证请求，并回复字符串
+    @RequestMapping(value = "/callback", method = RequestMethod.GET)
     public String verify(String msg_signature, String timestamp, String nonce, String echostr) {
-        String reply = MpCallbackModeVerifier.verify(msg_signature, timestamp, nonce, echostr);
+        String reply = mpAppContext.getCallbackModeVerifier().verify(msg_signature, timestamp, nonce, echostr);
 	return reply;
     }
     
-    ...
 }
 ```
 
@@ -140,18 +191,14 @@ public class CallbackController extends BaseController{
 @RequestMapping(value = "/wechat-mp")
 public class CallbackController extends BaseController{
 
-    //注入前面配置的回调处理器
-    @Autowired
-    private MpMessageDispatcher messageDispatcher;
+    @Autowired
+    private MpAppContext mpAppContext;
     
-    //这里省略验证开启回调的方法
-    ...
-    
-    //接收回调消息，并回复相应xml消息
-    @RequestMapping(value = "/callback", method = RequestMethod.POST)
+    //接收回调消息，并回复相应xml消息
+    @RequestMapping(value = "/callback", method = RequestMethod.POST)
     public String verify(String msg_signature, String timestamp, String nonce) {
-        //postBody是请求体内容，String格式，开发者可以请求中解析
-        String replyXml = messageDispatcher.dispatch(msg_signature(), timestamp, nonce, postBody);
+        //postBody是请求体内容，String格式，开发者可以通过HttpServletRequest来解析
+        String replyXml = mpAppContext.getMpMessageDispatcher().dispatch(msg_signature(), timestamp, nonce, postBody);
 	return replyXml;
     }
 }
@@ -159,7 +206,7 @@ public class CallbackController extends BaseController{
 
 ###### 回调消息的监听
 
-开发者可以通过继承`space.chensheng.wechatty.common.message.MessageListener`来监听特定类型的消息，为了让监听生效，还需要将其添加到开头提到的Spring bean配置文件MpMessageDispatcher的msgListeners中去。以下是一个监听用户发送的文本消息的例子:
+开发者可以通过继承`space.chensheng.wechatty.common.message.MessageListener`来监听特定类型的消息。以下是一个监听用户发送的文本消息的例子:
 
 ```
 public class TextMessageListener extends MessageListener<TextInboundMessage> {
@@ -224,7 +271,7 @@ VoiceReplyMessage|语音回复
 TextMassMessage message = new TextMassMessage();
 message.setIsToAll(true);
 message.setContent("群发消息测试");
-MpMessageSender.getInstance().send(message, 3);
+mpAppContext.getMpMessageSender().send(message, 3);
 ```
 群发消息类型|说明
 -----|-----
@@ -241,7 +288,7 @@ WxcardMassMessage|微信卡券群发
 TextCsMessage message = new TextCsMessage();
 message.setToUser("thisIsUserOpenId");
 message.setContent("客服消息测试 \n 212");
-MpMessageSender.getInstance().send(message, 3);
+mpAppContext.getMpMessageSender().send(message, 3);
 ```
 客服消息类型|说明
 -----|-----
@@ -263,7 +310,7 @@ WxcardCsMessage|微信卡券客服
 
 ```
 File image = new File("/this/is/image/path.jpg");
-ImagePermanentMedia material = new ImagePermanentMedia(image);
+ImagePermanentMedia material = new ImagePermanentMedia(mpAppContext, image);
 UploadResponse resp = material.upload();
 ```
 素材上传类|说明
@@ -281,29 +328,83 @@ VoiceTemporaryMedia|临时语音
 
 ###### 查询素材
 
-查询素材操作通过工具类`space.chensheng.wechatty.mp.material.MaterialQuery`和`space.chensheng.wechatty.mp.material.MaterialQuery`完成。
+查询素材操作通过工具类`space.chensheng.wechatty.mp.material.MaterialQuery`和`space.chensheng.wechatty.mp.material.MaterialFinder`完成。
 
-* 查询素材的数量信息：`MaterialQuery.count()`
-* 查询图文素材：`MaterialQuery.listNews(int offset, int count)`
-* 查询其他素材：`MaterialQuery.listMedia(MediaType mediaType, int offset, int count)`
-* 根据mediaId查找图文：`MaterialFinder.findNews(String mediaId)`
-* 根据mediaId查找永久视频：`MaterialFinder.findPermanentVideo(String mediaId)`
-* 根据mediaId查找临时视频：`MaterialFinder.findTemporaryVideo(String mediaId)`
-* 根据mediaId下载永久素材：`MaterialFinder.downloadPermanentMedia(String mediaId, String saveDir, String fileName)`
-* 根据mediaId下载临时素材：`MaterialFinder.downloadTemporaryMedia(String mediaId, String saveDir, String fileName)`
+* 查询素材的数量信息：`mpAppContext.getMaterialQuery().count()`
+* 查询图文素材：`mpAppContext.getMaterialQuery().listNews(int offset, int count)`
+* 查询其他素材：`mpAppContext.getMaterialQuery().listMedia(MediaType mediaType, int offset, int count)`
+* 根据mediaId查找图文：`mpAppContext.getMaterialFinder().findNews(String mediaId)`
+* 根据mediaId查找永久视频：`mpAppContext.getMaterialFinder().findPermanentVideo(String mediaId)`
+* 根据mediaId查找临时视频：`mpAppContext.getMaterialFinder().findTemporaryVideo(String mediaId)`
+* 根据mediaId下载永久素材：`mpAppContext.getMaterialFinder().downloadPermanentMedia(String mediaId, String saveDir, String fileName)`
+* 根据mediaId下载临时素材：`mpAppContext.getMaterialFinder().downloadTemporaryMedia(String mediaId, String saveDir, String fileName)`
 
 ###### 删除素材
 
 删除素材操作通过工具类`space.chensheng.wechatty.mp.material.MaterialDeleter`完成。
 
-* 根据mediaId删除素材：`MaterialDeleter.delete(String mediaId)`
+* 根据mediaId删除素材：`mpAppContext.getMaterialDeleter().delete(String mediaId)`
 
 ### 帐号管理
 
 ###### 生成带参数二维码
 
-生成带参数二维码通过工具类`space.chensheng.wechatty.mp.account.QRCodeCreater`完成。
+生成带参数二维码通过工具类`space.chensheng.wechatty.mp.account.QRCodeCreator`完成。
 
-* 生成带参数临时二维码：`QRCodeCreater.createTemporary(int expireSeconds, int sceneId)`
-* 生成带整型参数永久二维码：`QRCodeCreater.createPermanent(int sceneId)`
-* 生成带字符串参数永久二维码：`QRCodeCreater.createPermanent(String sceneStr)`
+* 生成带参数临时二维码：`mpAppContext.getQRCodeCreator().createTemporary(int expireSeconds, int sceneId)`
+* 生成带整型参数永久二维码：`mpAppContext.getQRCodeCreator().createPermanent(int sceneId)`
+* 生成带字符串参数永久二维码：`mpAppContext.getQRCodeCreator().createPermanent(String sceneStr)`
+
+###### 查询用户信息
+
+查询用户信息通过`UserInfoQuery`实现。
+
+* 查询单个用户信息: `mpAppConext.getUserInfoQuery().get(String openId)`
+* 批量查询用户信息：`mpAppContext.getUserInfoQuery().batchGet(List<String> openIds)`
+
+### 微信授权
+
+###### 用户授权
+
+用户授权通过`AuthHelper`实现。
+
+* 通过授权链接的code获取`auth access token`: `mpAppContext.getAuthHelper().fetchAuthAccessToken(String code)`
+* 刷新`auth access token`: `mpAppContext.getAuthHelper().refreshAuthAccessToken(String refreshAccessToken)`
+* 通过`auth access token`获取用户信息: `mpAppContext.getAuthHelper().fetchAuthUserInfo(String authAccessToken, String openId)`
+
+以下是一段用户授权的伪代码:
+```
+public WxAuthLoginDto authAndLogin(String code) {
+    AuthAccessTokenResponse authResp = mpAppContext.getAuthHelper().fetchAuthAccessToken(code);
+    if (authResp == null || !authResp.isOk()) {
+        //授权失败，执行相应业务逻辑
+        return new WxAuthLoginDto("fail");
+    }
+		
+    String openId = authResp.getOpenId();
+    AuthUserInfoResponse wxUserInfo = mpAppContext.getAuthHelper().fetchAuthUserInfo(authResp.getAccessToken(), authResp.getOpenId())
+    //根据微信用户信息在数据库里查找系统对应的用户，或新建一个用户
+    
+    //进行登录相关业务逻辑处理
+    return new WxAuthLoginDto("success");
+}
+```
+
+###### jsapi授权
+
+jsapi授权通过`JsapiHelper`实现。
+
+* 获取`jsapi ticket`(可使用定时任务来定时获取ticket并存于数据库中): `mpAppContext.getJsapiHelper().fetchTicket()`
+* 生成jsapi签名信息: `mpAppContext.getJsapiHelper().generateSignature(String jsapiTicket, String nonceStr, long timestamp, String url)`
+
+### 微信支付
+
+初始化`MpAppContext`时，调用`WechatMpBootstrap`的`enablePayCert()`方法来启用微支付，并配置相关参数。(具体参数查看[配置](#配置)模块)
+```
+WechatMpBootstrap bootstrap = new WechatMpBootstrap();
+bootstrap.enablePayCert();
+```
+
+* 发送普通红包: `mpAppContext.getPayHelper().sendRedPack(RedPackRequest request)`
+* 发送群红包: `mpAppContext.getPayHelper().sendGroupRedPack(GroupRedPackRequest request)`
+* 转账: `mpAppContext.getPayHelper().transfers(TransfersRequest request)`

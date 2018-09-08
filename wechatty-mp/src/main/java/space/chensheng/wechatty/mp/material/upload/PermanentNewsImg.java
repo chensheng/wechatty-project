@@ -4,17 +4,16 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import space.chensheng.wechatty.common.conf.AppContext;
 import space.chensheng.wechatty.common.material.Material;
-import space.chensheng.wechatty.common.material.MultiPartUploader;
-import space.chensheng.wechatty.mp.util.MpAccessTokenFetcher;
-import space.chensheng.wechatty.mp.util.MpWechatContext;
+import space.chensheng.wechatty.common.material.MaterialUploader;
 
 public class PermanentNewsImg extends Material {
 
 	private File img;
 	
-	public PermanentNewsImg(File img) {
-		super(MpWechatContext.getInstance(), MpAccessTokenFetcher.getInstance(), MultiPartUploader.getInstance(), "https://api.weixin.qq.com/cgi-bin/media/uploadimg");
+	public PermanentNewsImg(AppContext appContext, File img) {
+		super(appContext, "https://api.weixin.qq.com/cgi-bin/media/uploadimg");
 		
 		if (img == null) {
 			throw new NullPointerException("img may not be null");
@@ -24,7 +23,7 @@ public class PermanentNewsImg extends Material {
 	
 	@Override
 	protected void addQueryParam(Map<String, String> queryParams) {
-		queryParams.put("access_token", MpAccessTokenFetcher.getInstance().getAccessToken());
+		queryParams.put("access_token", this.getAppContext().getAccessTokenFetcher().getAccessToken());
 	}
 
 	@Override
@@ -32,5 +31,10 @@ public class PermanentNewsImg extends Material {
 		Map<String, Object> postBody = new HashMap<String, Object>();
 		postBody.put("media", img);
 		return postBody;
+	}
+
+	@Override
+	protected MaterialUploader getUploader(AppContext appContext) {
+		return appContext.getMultiPartUploader();
 	}
 }

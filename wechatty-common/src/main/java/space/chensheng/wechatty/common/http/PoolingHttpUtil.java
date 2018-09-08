@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Random;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import org.apache.http.Consts;
 import org.apache.http.Header;
@@ -29,17 +29,23 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import space.chensheng.wechatty.common.conf.WechatContext;
+import space.chensheng.wechatty.common.conf.AppContext;
 import space.chensheng.wechatty.common.util.ExceptionUtil;
 
 public class PoolingHttpUtil {
 	private static final Logger logger = LoggerFactory.getLogger(PoolingHttpUtil.class);
 	
-	public static String get(String url, WechatContext wechatContext) throws ClientProtocolException, IOException {
+	private PoolingHttpClient poolingHttpClient;
+	
+	public PoolingHttpUtil(AppContext appContext) {
+		poolingHttpClient = new PoolingHttpClient(appContext);
+	}
+	
+	public String get(String url) throws ClientProtocolException, IOException {
 		HttpGet httpGet = new HttpGet(url);
 		CloseableHttpResponse response = null;
 		try {
-			response = PoolingHttpClient.getInstance(wechatContext).execute(httpGet);
+			response = poolingHttpClient.get().execute(httpGet);
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 				return EntityUtils.toString(response.getEntity());
 			}
@@ -59,11 +65,11 @@ public class PoolingHttpUtil {
 		return null;
 	}
 	
-	public static String postString(String url, String postString, WechatContext wechatContext) throws ClientProtocolException, IOException {
-		return postString(url, postString, null, wechatContext);
+	public String postString(String url, String postString) throws ClientProtocolException, IOException {
+		return postString(url, postString, null);
 	}
 	
-	public static String postString(String url, String postString, RequestConfig config, WechatContext wechatContext) throws ClientProtocolException, IOException {
+	public String postString(String url, String postString, RequestConfig config) throws ClientProtocolException, IOException {
 		HttpPost httpPost = new HttpPost(url);
 		if(config != null) {
 			httpPost.setConfig(config);
@@ -75,7 +81,7 @@ public class PoolingHttpUtil {
 		
 		try {
 			httpPost.setEntity(new StringEntity(postString, Consts.UTF_8));
-			response = PoolingHttpClient.getInstance(wechatContext).execute(httpPost);
+			response = poolingHttpClient.get().execute(httpPost);
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 				return EntityUtils.toString(response.getEntity());
 			}
@@ -96,7 +102,7 @@ public class PoolingHttpUtil {
 		return null;
 	}
 	
-	public static String postMultipart(String url, Map<String, Object> params, WechatContext wechatContext) throws ClientProtocolException, IOException {
+	public String postMultipart(String url, Map<String, Object> params) throws ClientProtocolException, IOException {
 		HttpPost httpPost = new HttpPost(url);
         MultipartEntityBuilder meBuilder = MultipartEntityBuilder.create();
 	
@@ -119,7 +125,7 @@ public class PoolingHttpUtil {
 		CloseableHttpResponse response = null;
 		try {
 			httpPost.setEntity(meBuilder.build());
-			response = PoolingHttpClient.getInstance(wechatContext).execute(httpPost);
+			response = poolingHttpClient.get().execute(httpPost);
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 				return EntityUtils.toString(response.getEntity());
 			}
@@ -142,17 +148,16 @@ public class PoolingHttpUtil {
 	
 	/**
 	 * 
-	 * @param url
-	 * @param postString
-	 * @param downloadDir
-	 * @param fileName
-	 * @param wechatContext
-	 * @param ignoreContentTypes
+	 * @param url URL of file
+	 * @param postString post body of request
+	 * @param downloadDir directory to save file
+	 * @param fileName file name
+	 * @param ignoreContentTypes response content types to ignore download
 	 * @return string if response content type is in {@code ignoreContentTypes}, file if download success, otherwise null. 
-	 * @throws ClientProtocolException
-	 * @throws IOException
+	 * @throws ClientProtocolException in case of an http protocol error
+	 * @throws IOException if an error occurs reading the input streamSince:
 	 */
-	public static Object downloadFileByPost(String url, String postString,  String downloadDir, String fileName, WechatContext wechatContext, String...ignoreContentTypes) throws ClientProtocolException, IOException {
+	public Object downloadFileByPost(String url, String postString,  String downloadDir, String fileName, String...ignoreContentTypes) throws ClientProtocolException, IOException {
 		Object file = null;
 		CloseableHttpResponse response = null;
 		HttpPost httpPost = new HttpPost(url);
@@ -162,7 +167,7 @@ public class PoolingHttpUtil {
 		
 		try {
 			httpPost.setEntity(new StringEntity(postString, Consts.UTF_8));
-			response = PoolingHttpClient.getInstance(wechatContext).execute(httpPost);
+			response = poolingHttpClient.get().execute(httpPost);
 			file = doDownload(response, downloadDir, fileName, ignoreContentTypes);
 			if (response != null) {
 				EntityUtils.consume(response.getEntity());
@@ -183,22 +188,21 @@ public class PoolingHttpUtil {
 	
 	/**
 	 * 
-	 * @param url
-	 * @param downloadDir
-	 * @param fileName
-	 * @param wechatContext
-	 * @param ignoreContentTypes 
+	 * @param url file URL
+	 * @param downloadDir directory to save file
+	 * @param fileName file name 
+	 * @param ignoreContentTypes response content types to ignore download
 	 * @return string if response content type is in {@code ignoreContentTypes}, file if download success, otherwise null. 
-	 * @throws IllegalStateException
-	 * @throws IOException
+	 * @throws IllegalStateException if the uri is invalid
+	 * @throws IOException in case of a problem or the connection was aborted
 	 */
-	public static Object downloadFileByGet(String url, String downloadDir, String fileName, WechatContext wechatContext, String...ignoreContentTypes) throws IllegalStateException, IOException {
+	public Object downloadFileByGet(String url, String downloadDir, String fileName, String...ignoreContentTypes) throws IllegalStateException, IOException {
 		Object file = null;
 		HttpGet httpGet = new HttpGet(url);
 		CloseableHttpResponse response  = null;
 		
 		try {
-			response = PoolingHttpClient.getInstance(wechatContext).execute(httpGet);
+			response = poolingHttpClient.get().execute(httpGet);
 			file = doDownload(response, downloadDir, fileName, ignoreContentTypes);
 			if (response != null) {
 				EntityUtils.consume(response.getEntity());
@@ -217,7 +221,7 @@ public class PoolingHttpUtil {
 		return file;
 	}
 	
-	private static Object doDownload(CloseableHttpResponse response, String downloadDir, String fileName, String... ignoreContentTypes) {
+	private Object doDownload(CloseableHttpResponse response, String downloadDir, String fileName, String... ignoreContentTypes) {
 		if (response == null || response.getEntity() == null) {
 			return null;
 		}
@@ -275,7 +279,7 @@ public class PoolingHttpUtil {
 		return file;
 	}
 	
-	private static boolean validateContent(CloseableHttpResponse response, String[] ignoreContentTypes) {		
+	private boolean validateContent(CloseableHttpResponse response, String[] ignoreContentTypes) {		
 		if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
 			return false;
 		}
@@ -297,7 +301,7 @@ public class PoolingHttpUtil {
 		return true;
 	}
 	
-	private static String generateFileName(String fileName, CloseableHttpResponse response) {
+	private String generateFileName(String fileName, CloseableHttpResponse response) {
 		if (fileName == null) {
 			fileName = resolveFileName(response);
 		}
@@ -310,7 +314,7 @@ public class PoolingHttpUtil {
 		return fileName;
 	}
 	
-	private static String resolveFileName(CloseableHttpResponse response) {
+	private String resolveFileName(CloseableHttpResponse response) {
 		Header[] headers = response.getHeaders("Content-disposition");
 		if (headers != null && headers.length > 0) {
 			for (Header header : headers) {

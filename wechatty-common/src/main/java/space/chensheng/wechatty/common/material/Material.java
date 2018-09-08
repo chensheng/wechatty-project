@@ -5,15 +5,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import space.chensheng.wechatty.common.conf.WechatContext;
-import space.chensheng.wechatty.common.http.AccessTokenFetcher;
+import space.chensheng.wechatty.common.conf.AppContext;
 
 public abstract class Material {
-	private WechatContext wechatContext;
-	
-	private AccessTokenFetcher accessTokenFetcher;
-	
-	private MaterialUploader uploader;
+	private AppContext appContext;
 	
 	private String uploadUrl;
 	
@@ -21,32 +16,20 @@ public abstract class Material {
 	
 	/**
 	 * 
-	 * @param wechatContext
-	 * @param accessTokenFetcher
-	 * @param uploader
-	 * @param uploadUrl
+	 * @param appContext application context
+	 * @param uploadUrl material upload URL
 	 * @throws NullPointerException if any argument is null
 	 */
-	public Material(WechatContext wechatContext, AccessTokenFetcher accessTokenFetcher, MaterialUploader uploader, String uploadUrl) {
-		if (wechatContext == null) {
-			throw new NullPointerException("wechatContext may not be null");
-		}
-		
-		if (accessTokenFetcher == null) {
-			throw new NullPointerException("accessTokenFetcher may not be null");
-		}
-		
-		if (uploader == null) {
-			throw new NullPointerException("uploader may not be null");
+	public Material(AppContext appContext, String uploadUrl) {
+		if (appContext == null) {
+			throw new NullPointerException("appContext may not be null");
 		}
 		
 		if (uploadUrl == null) {
 			throw new NullPointerException("uploadUrl may not be null");
 		}
 		
-		this.wechatContext = wechatContext;
-		this.accessTokenFetcher = accessTokenFetcher;
-		this.uploader = uploader;
+		this.appContext = appContext;
 		this.uploadUrl = uploadUrl;
 		this.queryParams = new HashMap<String, String>();
 	}
@@ -60,18 +43,17 @@ public abstract class Material {
 	 * @return null if network error
 	 */
 	public final UploadResponse upload() {
-		queryParams.put("access_token", accessTokenFetcher.getAccessToken());
+		queryParams.put("access_token", appContext.getAccessTokenFetcher().getAccessToken());
 		this.addQueryParam(queryParams);
-		return uploader.upload(this);
+		return this.getUploader(appContext).upload(this);
 	}
 	
-	WechatContext getWechatContext() {
-		return wechatContext;
+	protected abstract MaterialUploader getUploader(AppContext appContext);
+	
+	public AppContext getAppContext() {
+		return appContext;
 	}
 	
-	AccessTokenFetcher getAccessTokenFetcher() {
-		return accessTokenFetcher;
-	}
 	
 	String getUploadUrl() {
 		return uploadUrl;

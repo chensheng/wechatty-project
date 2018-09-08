@@ -7,17 +7,17 @@ import org.apache.http.client.ClientProtocolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import space.chensheng.wechatty.common.conf.WechatContext;
+import space.chensheng.wechatty.common.conf.AppContext;
 import space.chensheng.wechatty.common.util.ExceptionUtil;
 import space.chensheng.wechatty.common.util.JsonMapper;
 import space.chensheng.wechatty.common.util.StringUtil;
 
 public abstract class AccessTokenFetcher {
-private static final Logger logger = LoggerFactory.getLogger(AccessTokenFetcher.class);
+	private static final Logger logger = LoggerFactory.getLogger(AccessTokenFetcher.class);
 	
 	private String getTokenUrl;
 	
-	private WechatContext wechatContext;
+	private AppContext appContext;
 	
 	private Semaphore updateSemaphore = new Semaphore(1);
 	
@@ -26,20 +26,21 @@ private static final Logger logger = LoggerFactory.getLogger(AccessTokenFetcher.
 	
 	/**
 	 * 
-	 * @param getTokenUrl
+	 * @param getTokenUrl the request url to fetch access token
+	 * @param appContext application context
 	 * @throws NullPointerException if getTokenUrl is null
 	 */
-	public AccessTokenFetcher(String getTokenUrl, WechatContext wechatContext) {
+	public AccessTokenFetcher(String getTokenUrl, AppContext appContext) {
 		if (StringUtil.isEmpty(getTokenUrl)) {
 			throw new NullPointerException("getTokenUrl may not be null");
 		}
 		
-		if (wechatContext == null) {
-			throw new NullPointerException("wechatContext may not be null");
+		if (appContext == null) {
+			throw new NullPointerException("appContext may not be null");
 		}
 		
+		this.appContext = appContext;
 		this.getTokenUrl = getTokenUrl;
-		this.wechatContext = wechatContext;
 		this.initAccessTokenStrategy();
 	}
 	
@@ -57,7 +58,7 @@ private static final Logger logger = LoggerFactory.getLogger(AccessTokenFetcher.
 		try {
 			
 			try {
-				String responseStr = PoolingHttpUtil.get(getTokenUrl, wechatContext);
+				String responseStr = appContext.getPoolingHttpUtil().get(getTokenUrl);
 				AccessTokenResponse response = JsonMapper.nonEmptyMapper().fromJson(responseStr, AccessTokenResponse.class);
 				if (response == null || StringUtil.isEmpty(response.getAccessToken())) {
 					logger.error("fail to update access token, errcode: {}, errmsg: {}", 
@@ -82,8 +83,13 @@ private static final Logger logger = LoggerFactory.getLogger(AccessTokenFetcher.
 		return accessTokenStrategy.doQuery();
 	}
 	
-	public void updateIfNecessary(BaseResponse resp) {
-		if (resp != null && resp.isAccessTokenError() && wechatContext.getAutoUpdateAccessToken()) {
+	public void updateIfNecessary(Object resp) {
+		if (resp == null || !BaseResponse.class.isAssignableFrom(resp.getClass())) {
+			return;
+		}
+		
+		BaseResponse baseResp = (BaseResponse) resp;
+		if (baseResp.isAccessTokenError() && appContext.getWechatContext().getAutoUpdateAccessToken()) {
 			updateAccessToken();
 		}
 	}
@@ -93,7 +99,7 @@ private static final Logger logger = LoggerFactory.getLogger(AccessTokenFetcher.
 	}
 	
 	private void initAccessTokenStrategy() {
-		String strategyClassName = wechatContext.getAccessTokenStrategyClass();
+		String strategyClassName = appContext.getWechatContext().getAccessTokenStrategyClass();
 		Class<?> strategyClass = null;
 		try {
 			strategyClass = Class.forName(strategyClassName);

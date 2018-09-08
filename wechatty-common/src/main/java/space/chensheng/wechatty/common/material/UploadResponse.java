@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import space.chensheng.wechatty.common.http.BaseResponse;
 
 public class UploadResponse extends BaseResponse {
-	
+	private static final long serialVersionUID = 8206085750887320988L;
+
 	private String type;
 	
 	@JsonProperty("created_at")

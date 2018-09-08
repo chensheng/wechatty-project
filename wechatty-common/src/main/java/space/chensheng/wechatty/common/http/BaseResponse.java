@@ -1,7 +1,10 @@
 package space.chensheng.wechatty.common.http;
 
+import java.io.Serializable;
 
-public class BaseResponse {
+public class BaseResponse implements Serializable {
+	private static final long serialVersionUID = 2452740516111614021L;
+
 	private Integer errcode;
 	
 	private String errmsg;

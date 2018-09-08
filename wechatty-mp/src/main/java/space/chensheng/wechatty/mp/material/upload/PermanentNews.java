@@ -6,18 +6,17 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import space.chensheng.wechatty.common.conf.AppContext;
 import space.chensheng.wechatty.common.material.Material;
-import space.chensheng.wechatty.common.material.StringBodyUploader;
+import space.chensheng.wechatty.common.material.MaterialUploader;
 import space.chensheng.wechatty.common.util.JsonBean;
-import space.chensheng.wechatty.mp.util.MpAccessTokenFetcher;
-import space.chensheng.wechatty.mp.util.MpWechatContext;
 
 public class PermanentNews extends Material {
 	
 	private MpNews mpNews;
 	
-	public PermanentNews() {
-		super(MpWechatContext.getInstance(), MpAccessTokenFetcher.getInstance(), StringBodyUploader.getInstance(), "https://api.weixin.qq.com/cgi-bin/material/add_news");
+	public PermanentNews(AppContext appContext) {
+		super(appContext, "https://api.weixin.qq.com/cgi-bin/material/add_news");
 		mpNews = new MpNews();
 	}
 	
@@ -36,12 +35,17 @@ public class PermanentNews extends Material {
 
 	@Override
 	protected void addQueryParam(Map<String, String> queryParams) {
-		queryParams.put("access_token", MpAccessTokenFetcher.getInstance().getAccessToken());
+		queryParams.put("access_token", this.getAppContext().getAccessTokenFetcher().getAccessToken());
 	}
 
 	@Override
 	protected Object createPostBody() {
 		return mpNews;
+	}
+	
+	@Override
+	protected MaterialUploader getUploader(AppContext appContext) {
+		return appContext.getStringBodyUploader();
 	}
 	
 	private static class MpNews extends JsonBean {
@@ -76,4 +80,5 @@ public class PermanentNews extends Material {
 		@JsonProperty("content_source_url")
 		String contentSourceUrl;
 	}
+
 }

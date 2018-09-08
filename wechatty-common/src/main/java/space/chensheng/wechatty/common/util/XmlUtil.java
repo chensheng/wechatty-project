@@ -1,6 +1,5 @@
 package space.chensheng.wechatty.common.util;
 
-import java.io.InputStream;
 import java.io.Writer;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -28,7 +27,7 @@ public class XmlUtil {
 	
 	/**
 	 * Convert from POJO to XML string
-	 * @param pojo
+	 * @param pojo object to convert
 	 * @return XML string stands for the POJO
 	 */
 	public static String toXML(Object pojo) {
@@ -38,22 +37,66 @@ public class XmlUtil {
 		
 		XStream xstream = createXStream(pojo.getClass());
 		try {
-			return xstream.toXML(pojo);
+			String xml = xstream.toXML(pojo);
+			if (xml != null) {
+				xml = xml.replaceAll("__", "_");
+			}
+			return xml;
 		} catch (XStreamException e) {
 			logger.error(ExceptionUtil.getExceptionDetails(e));
 			return "";
 		}
 	}
 	
-	
 	/**
 	 * Convert from XML string to POJO
-	 * @param xmlStr
+	 * @param xmlStr xml string
+	 * @param clzz class of return object
+	 * @param allowExternalEntity whether to convert XML with {@code "<!ENTITY"} tag
+	 * @return an object if success, otherwise null 
+	 */
+	public static <T> T fromXML(String xmlStr, Class<T> clzz, boolean allowExternalEntity) {
+		if (!allowExternalEntity && containsExternalEntity(xmlStr)) {
+			logger.error("External entity is not allowed, xmlContent: {}", xmlStr);
+			return null;
+		}
+		
+		XStream xstream = createXStream(clzz);
+		try {
+			@SuppressWarnings("unchecked")
+			T pojo = (T) xstream.fromXML(xmlStr);
+			return pojo;
+		} catch (XStreamException e) {
+			logger.error(ExceptionUtil.getExceptionDetails(e));
+			return null;
+		}
+	}
+	
+	/**
+	 * Convert from XML string to POJO, not allow XML with {@code "<!ENTITY"}} tag
+	 * @param xmlStr xml string
 	 * @param clzz the class of POJO
-	 * @return POJO
+	 * @return POJO if success, otherwise null
 	 */
 	public static <T> T fromXML(String xmlStr, Class<T> clzz) {
+		return fromXML(xmlStr, clzz, false);
+	}
+	
+	/**
+	 * Convert from XML string to POJO, and ignore unknown elements.
+	 * @param xmlStr xml string
+	 * @param clzz class of return object
+	 * @param allowExternalEntity whether to convert XML with {@code "<!ENTITY"} tag
+	 * @return an object if success, otherwise null
+	 */
+	public static <T> T fromXMLIgnoreUnknownElements(String xmlStr, Class<T> clzz, boolean allowExternalEntity) {
+		if (!allowExternalEntity && containsExternalEntity(xmlStr)) {
+			logger.error("External entity is not allowed, xmlContent: {}", xmlStr);
+			return null;
+		}
+		
 		XStream xstream = createXStream(clzz);
+		xstream.ignoreUnknownElements();
 		
 		try {
 			@SuppressWarnings("unchecked")
@@ -65,45 +108,14 @@ public class XmlUtil {
 		}
 	}
 	
+	/**
+	 * Convert from XML string to POJO, and ignore unknown elements, not allow XML with {@code "<!ENTITY"}} tag
+	 * @param xmlStr xml string
+	 * @param clzz class of return object
+	 * @return an if success, otherwise null
+	 */
 	public static <T> T fromXMLIgnoreUnknownElements(String xmlStr, Class<T> clzz) {
-		XStream xstream = createXStream(clzz);
-		xstream.ignoreUnknownElements();
-		
-		try {
-			@SuppressWarnings("unchecked")
-			T pojo = (T) xstream.fromXML(xmlStr);
-			return pojo;
-		} catch (XStreamException e) {
-			logger.error(ExceptionUtil.getExceptionDetails(e));
-			return null;
-		}
-	}
-	
-	public static <T> T fromXML(InputStream is, Class<T> clzz) {
-		XStream xstream = createXStream(clzz);
-		
-		try {
-			@SuppressWarnings("unchecked")
-			T pojo = (T) xstream.fromXML(is);
-			return pojo;
-		} catch (XStreamException e) {
-			logger.error(ExceptionUtil.getExceptionDetails(e));
-			return null;
-		}
-	}
-	
-	public static <T> T fromXMLIgnoreUnknownElements(InputStream is, Class<T> clzz) {
-		XStream xstream = createXStream(clzz);
-		xstream.ignoreUnknownElements();
-		
-		try {
-			@SuppressWarnings("unchecked")
-			T pojo = (T) xstream.fromXML(is);
-			return pojo;
-		} catch (XStreamException e) {
-			logger.error(ExceptionUtil.getExceptionDetails(e));
-			return null;
-		}
+		return fromXMLIgnoreUnknownElements(xmlStr, clzz, false);
 	}
 	
 	@Retention(RetentionPolicy.RUNTIME)
@@ -208,5 +220,17 @@ public class XmlUtil {
             }  
         }
 		return false;  
+	}
+	
+	private static boolean containsExternalEntity(String xmlStr) {
+		if (StringUtil.isEmpty(xmlStr)) {
+			return false;
+		}
+		
+		if (xmlStr.toUpperCase().contains("<!ENTITY")) {
+			return true;
+		}
+		
+		return false;
 	}
 }

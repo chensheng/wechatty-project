@@ -2,7 +2,7 @@ package space.chensheng.wechatty.common.security;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -39,7 +39,7 @@ public class WXBizMsgCrypt {
 	 * 构造函数
 	 * @param token 公众平台上，开发者设置的token
 	 * @param encodingAesKey 公众平台上，开发者设置的EncodingAESKey
-	 * @param appId 
+	 * @param appId application id
 	 */
 	public WXBizMsgCrypt(String token, String encodingAesKey, String appId) {
 		this.token = token;
@@ -67,10 +67,9 @@ public class WXBizMsgCrypt {
 
 	String getRandomStr() {
 		String base = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		Random random = new Random();
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < 16; i++) {
-			int number = random.nextInt(base.length());
+			int number = ThreadLocalRandom.current().nextInt(base.length());
 			sb.append(base.charAt(number));
 		}
 		return sb.toString();

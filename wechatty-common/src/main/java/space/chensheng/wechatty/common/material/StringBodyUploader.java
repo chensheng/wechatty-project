@@ -1,17 +1,13 @@
 package space.chensheng.wechatty.common.material;
 
-import space.chensheng.wechatty.common.http.WechatRequester;
+import space.chensheng.wechatty.common.conf.AppContext;
 import space.chensheng.wechatty.common.util.StringUtil;
 
 public class StringBodyUploader implements MaterialUploader {
-    private static final StringBodyUploader instance = new StringBodyUploader();
+	private AppContext appContext;
     
-    public static StringBodyUploader getInstance() {
-    	return instance;
-    }
-    
-    private StringBodyUploader() {
-    	
+    public StringBodyUploader(AppContext appContext) {
+    	this.appContext = appContext;
     }
     
 	public UploadResponse upload(Material material) {
@@ -27,7 +23,7 @@ public class StringBodyUploader implements MaterialUploader {
 			postString = String.valueOf(postBody);
 		}
 		
-		return WechatRequester.postString(uploadUrl, postString, UploadResponse.class, material.getWechatContext(), material.getAccessTokenFetcher());
+		return appContext.getWechatRequester().postString(uploadUrl, postString, UploadResponse.class);
 	}
 
 }

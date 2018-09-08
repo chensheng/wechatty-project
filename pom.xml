@@ -4,7 +4,7 @@
   
   <groupId>space.chensheng.wechatty</groupId>
   <artifactId>wechatty-project</artifactId>
-  <version>0.0.1</version>
+  <version>1.0.0</version>
   <packaging>pom</packaging>
   
   <name>${project.groupId}:${project.artifactId}</name>

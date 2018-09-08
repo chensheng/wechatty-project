@@ -4,22 +4,12 @@ import space.chensheng.wechatty.common.message.MessageSender;
 import space.chensheng.wechatty.common.message.SendMessageResponse;
 import space.chensheng.wechatty.mp.message.outbound.CsOutboundMessage;
 import space.chensheng.wechatty.mp.message.outbound.MassOutboundMessage;
-import space.chensheng.wechatty.mp.util.MpAccessTokenFetcher;
-import space.chensheng.wechatty.mp.util.MpWechatContext;
+import space.chensheng.wechatty.mp.util.MpAppContext;
 
 public class MpMessageSender extends MessageSender {
 	
-	private static class InstanceHolder {
-		public static MpMessageSender instance = new MpMessageSender();
-	}
-	
-	public static MpMessageSender getInstance() {
-		return InstanceHolder.instance;
-	}
-	
-	
-	private MpMessageSender() {
-		super(MpWechatContext.getInstance(), MpAccessTokenFetcher.getInstance());
+	public MpMessageSender(MpAppContext appContext) {
+		super(appContext);
 	}
 
 	/**

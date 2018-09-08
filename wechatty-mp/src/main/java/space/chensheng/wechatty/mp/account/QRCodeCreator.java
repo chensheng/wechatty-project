@@ -8,16 +8,20 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import space.chensheng.wechatty.common.conf.AppContext;
 import space.chensheng.wechatty.common.http.BaseResponse;
-import space.chensheng.wechatty.common.http.WechatRequester;
 import space.chensheng.wechatty.common.util.ExceptionUtil;
 import space.chensheng.wechatty.common.util.JsonBean;
 import space.chensheng.wechatty.common.util.StringUtil;
-import space.chensheng.wechatty.mp.util.MpAccessTokenFetcher;
-import space.chensheng.wechatty.mp.util.MpWechatContext;
 
-public class QRCodeCreater {
-	private static final Logger logger = LoggerFactory.getLogger(QRCodeCreater.class);
+public class QRCodeCreator {
+	private static final Logger logger = LoggerFactory.getLogger(QRCodeCreator.class);
+	
+	private AppContext appContext;
+	
+	public QRCodeCreator(AppContext appContext) {
+		this.appContext = appContext;
+	}
 	
 	/**
 	 * create temporary QRCode, it will expire in {@code expireSeconds}
@@ -25,7 +29,7 @@ public class QRCodeCreater {
 	 * @param sceneId
 	 * @return null if network error
 	 */
-	public static QRCodeResponse createTemporary(int expireSeconds, int sceneId) {
+	public QRCodeResponse createTemporary(int expireSeconds, int sceneId) {
 		PostData postData = PostData.createTemporaryPostData(expireSeconds, sceneId);
 		return doCreate(postData);
 	}
@@ -35,7 +39,7 @@ public class QRCodeCreater {
 	 * @param sceneId {@code >= 1 && <= 100000}
 	 * @return null if network error
 	 */
-	public static QRCodeResponse createPermanent(int sceneId) {
+	public QRCodeResponse createPermanent(int sceneId) {
 		PostData postData = PostData.createPermanentPostData(sceneId);
 		return doCreate(postData);
 	}
@@ -45,14 +49,14 @@ public class QRCodeCreater {
 	 * @param sceneStr
 	 * @return null if network error
 	 */
-	public static QRCodeResponse createPermanent(String sceneStr) {
+	public QRCodeResponse createPermanent(String sceneStr) {
 		PostData postData = PostData.createPermanentPostData(sceneStr);
 		return doCreate(postData);
 	}
 	
-	private static QRCodeResponse doCreate(PostData postData) {
-		String url = String.format("https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=%s", MpAccessTokenFetcher.getInstance().getAccessToken());
-		return WechatRequester.postString(url, postData.toString(), QRCodeResponse.class, MpWechatContext.getInstance(), MpAccessTokenFetcher.getInstance());
+	private QRCodeResponse doCreate(PostData postData) {
+		String url = String.format("https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=%s", appContext.getAccessTokenFetcher().getAccessToken());
+		return appContext.getWechatRequester().postString(url, postData.toString(), QRCodeResponse.class);
 	}
 	
 	private static class PostData extends JsonBean {
@@ -118,6 +122,8 @@ public class QRCodeCreater {
 	}
 	
 	public static class QRCodeResponse extends BaseResponse {
+		private static final long serialVersionUID = -7208516766118217986L;
+
 		private String ticket;
 		
 		@JsonProperty("expire_seconds")

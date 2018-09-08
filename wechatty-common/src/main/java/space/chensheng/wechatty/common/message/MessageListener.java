@@ -8,7 +8,7 @@ public abstract class MessageListener<T extends InboundMessage> {
 	/**
 	 * This method should return in 5 seconds, or wechat server will retry to send message.
 	 * So don't do time consuming task here.
-	 * @param message
+	 * @param message received message
 	 * @return null or concrete {@link ReplyMessage}
 	 */
 	protected abstract ReplyMessage onMessage(T message);

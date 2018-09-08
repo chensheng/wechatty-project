@@ -2,19 +2,14 @@ package space.chensheng.wechatty.common.material;
 
 import java.util.Map;
 
-import space.chensheng.wechatty.common.http.WechatRequester;
+import space.chensheng.wechatty.common.conf.AppContext;
 import space.chensheng.wechatty.common.util.StringUtil;
 
 public class MultiPartUploader implements MaterialUploader {
-	
-    private static final MultiPartUploader instance = new MultiPartUploader();
+	private AppContext appContext;
     
-    public static MultiPartUploader getInstance() {
-    	return instance;
-    }
-    
-    private MultiPartUploader() {
-    	
+    public MultiPartUploader(AppContext appContext) {
+    	this.appContext = appContext;
     }
     
 	@SuppressWarnings("unchecked")
@@ -31,7 +26,7 @@ public class MultiPartUploader implements MaterialUploader {
 			params = (Map<String, Object>) postBody;
 		}
 		
-		return WechatRequester.postMultipart(uploadUrl, params, UploadResponse.class, material.getWechatContext(), material.getAccessTokenFetcher());
+		return appContext.getWechatRequester().postMultipart(uploadUrl, params, UploadResponse.class);
 	}
 
 }

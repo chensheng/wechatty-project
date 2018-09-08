@@ -2,22 +2,25 @@ package space.chensheng.wechatty.mp.material;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import space.chensheng.wechatty.common.conf.AppContext;
 import space.chensheng.wechatty.common.http.BaseResponse;
-import space.chensheng.wechatty.common.http.WechatRequester;
 import space.chensheng.wechatty.common.material.MediaType;
 import space.chensheng.wechatty.common.util.JsonBean;
-import space.chensheng.wechatty.mp.util.MpAccessTokenFetcher;
-import space.chensheng.wechatty.mp.util.MpWechatContext;
 
 public class MaterialQuery {
+	private AppContext appContext;
+	
+	public MaterialQuery(AppContext appContext) {
+		this.appContext = appContext;
+	}
 	
 	/**
 	 * 
 	 * @return null if network error
 	 */
-	public static CountQueryResponse count() {
-		String url = String.format("https://api.weixin.qq.com/cgi-bin/material/get_materialcount?access_token=%s", MpAccessTokenFetcher.getInstance().getAccessToken());
-		return WechatRequester.postString(url, null, CountQueryResponse.class, MpWechatContext.getInstance(), MpAccessTokenFetcher.getInstance());
+	public CountQueryResponse count() {
+		String url = String.format("https://api.weixin.qq.com/cgi-bin/material/get_materialcount?access_token=%s", appContext.getAccessTokenFetcher().getAccessToken());
+		return appContext.getWechatRequester().postString(url, null, CountQueryResponse.class);
 	}
 	
 	/**
@@ -26,7 +29,7 @@ public class MaterialQuery {
 	 * @param count {@code >= 1 && <= 20}
 	 * @return null if network error
 	 */
-	public static NewsListResponse listNews(int offset, int count) {
+	public NewsListResponse listNews(int offset, int count) {
 		ListPostData postData = new ListPostData(MediaType.NEWS, offset, count);
 		return list(postData, NewsListResponse.class);
 	}
@@ -40,7 +43,7 @@ public class MaterialQuery {
 	 * @throws NullPointerException if mediaType is null
 	 * @throws IllegalArgumentException if mediaType is {@link MediaType#NEWS}
 	 */
-	public static MediaListResponse listMedia(MediaType mediaType, int offset, int count) {
+	public MediaListResponse listMedia(MediaType mediaType, int offset, int count) {
 		if (mediaType == null) {
 			throw new NullPointerException("mediaType may not be null");
 		}
@@ -53,9 +56,9 @@ public class MaterialQuery {
 		return list(postData, MediaListResponse.class);
 	}
 	
-	private static <T extends BaseResponse> T list(ListPostData postData, Class<T> retClzz) {
-		String url = String.format("https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token=%s", MpAccessTokenFetcher.getInstance().getAccessToken());
-		return WechatRequester.postString(url, postData.toString(), retClzz, MpWechatContext.getInstance(), MpAccessTokenFetcher.getInstance());
+	private <T extends BaseResponse> T list(ListPostData postData, Class<T> retClzz) {
+		String url = String.format("https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token=%s", appContext.getAccessTokenFetcher().getAccessToken());
+		return appContext.getWechatRequester().postString(url, postData.toString(), retClzz);
 	}
 	
 	private static class ListPostData extends JsonBean {

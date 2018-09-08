@@ -1,6 +1,5 @@
 package space.chensheng.wechatty.mp.util;
 
-import space.chensheng.wechatty.common.conf.PropOption;
 import space.chensheng.wechatty.common.conf.WechatContext;
 
 public class MpWechatContext extends WechatContext {
@@ -8,26 +7,30 @@ public class MpWechatContext extends WechatContext {
 	
 	private static final String CUSTOMER_CONF_PATH = "/wechat-mp.properties";
 	
-	private static MpWechatContext instance = new MpWechatContext();
-	
-	public static MpWechatContext getInstance() {
-		return instance;
-	}
-	
-	@PropOption(notNull = true)
 	private String token;
 	
-	@PropOption(notNull = true)
 	private String aesKey;
 	
-	@PropOption(notNull = true)
 	private String appId;
 	
-	@PropOption(notNull = true)
 	private String appSecret;
 	
-	private MpWechatContext() {
-		super(DEFAULT_CONF_PATH, CUSTOMER_CONF_PATH);
+	private String payKey;
+	
+	private String payCertFile;
+	
+	private String payCertPassword;
+	
+	private String payMchId;
+	
+	private String payClientIp;
+	
+	public MpWechatContext() {
+		this(CUSTOMER_CONF_PATH);
+	}
+	
+	public MpWechatContext(String customerConfPath) {
+		super(DEFAULT_CONF_PATH, customerConfPath);
 	}
 
 	public String getToken() {
@@ -60,5 +63,45 @@ public class MpWechatContext extends WechatContext {
 
 	public void setAppSecret(String appSecret) {
 		this.appSecret = appSecret;
+	}
+
+	public String getPayKey() {
+		return payKey;
+	}
+
+	public void setPayKey(String payKey) {
+		this.payKey = payKey;
+	}
+
+	public String getPayCertFile() {
+		return payCertFile;
+	}
+
+	public void setPayCertFile(String payCertFile) {
+		this.payCertFile = payCertFile;
+	}
+
+	public String getPayCertPassword() {
+		return payCertPassword;
+	}
+
+	public void setPayCertPassword(String payCertPassword) {
+		this.payCertPassword = payCertPassword;
+	}
+
+	public String getPayMchId() {
+		return payMchId;
+	}
+
+	public void setPayMchId(String payMchId) {
+		this.payMchId = payMchId;
+	}
+
+	public String getPayClientIp() {
+		return payClientIp;
+	}
+
+	public void setPayClientIp(String payClientIp) {
+		this.payClientIp = payClientIp;
 	}
 }

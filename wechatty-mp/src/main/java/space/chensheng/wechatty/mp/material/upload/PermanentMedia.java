@@ -4,26 +4,24 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import space.chensheng.wechatty.common.conf.AppContext;
 import space.chensheng.wechatty.common.material.Material;
+import space.chensheng.wechatty.common.material.MaterialUploader;
 import space.chensheng.wechatty.common.material.MediaType;
-import space.chensheng.wechatty.common.material.MultiPartUploader;
-import space.chensheng.wechatty.mp.util.MpAccessTokenFetcher;
-import space.chensheng.wechatty.mp.util.MpWechatContext;
 
 public abstract class PermanentMedia extends Material {
-	
 	private MediaType mediaType;
 	
 	private File media;
 	
 	/**
-	 * 
+	 * @param appContext
 	 * @param mediaType
 	 * @param media
 	 * @throws NullPointerException if any argument is null
 	 */
-	public PermanentMedia(MediaType mediaType, File media) {
-		super(MpWechatContext.getInstance(), MpAccessTokenFetcher.getInstance(), MultiPartUploader.getInstance(), "https://api.weixin.qq.com/cgi-bin/material/add_material");
+	public PermanentMedia(AppContext appContext, MediaType mediaType, File media) {
+		super(appContext, "https://api.weixin.qq.com/cgi-bin/material/add_material");
 		
 		if (mediaType == null) {
 			throw new NullPointerException("mediaType may not be null");
@@ -39,7 +37,7 @@ public abstract class PermanentMedia extends Material {
 
 	@Override
 	protected void addQueryParam(Map<String, String> queryParams) {
-		queryParams.put("access_token", MpAccessTokenFetcher.getInstance().getAccessToken());
+		queryParams.put("access_token", this.getAppContext().getAccessTokenFetcher().getAccessToken());
 		queryParams.put("type", mediaType.toString());
 	}
 	
@@ -52,5 +50,10 @@ public abstract class PermanentMedia extends Material {
 	}
 	
 	protected void addPostBody(Map<String, Object> postBody) {
+	}
+	
+	@Override
+	protected MaterialUploader getUploader(AppContext appContext) {
+		return appContext.getMultiPartUploader();
 	}
 }

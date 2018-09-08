@@ -2,6 +2,7 @@ package space.chensheng.wechatty.mp.message;
 
 import java.util.List;
 
+import space.chensheng.wechatty.common.conf.AppContext;
 import space.chensheng.wechatty.common.message.EventType;
 import space.chensheng.wechatty.common.message.MessageDispatcher;
 import space.chensheng.wechatty.common.message.MessageListener;
@@ -22,13 +23,11 @@ import space.chensheng.wechatty.mp.message.inbound.simple.ShortVideoInboundMessa
 import space.chensheng.wechatty.mp.message.inbound.simple.TextInboundMessage;
 import space.chensheng.wechatty.mp.message.inbound.simple.VideoInboundMessage;
 import space.chensheng.wechatty.mp.message.inbound.simple.VoiceInboundMessage;
-import space.chensheng.wechatty.mp.util.MpCrypterFactory;
-import space.chensheng.wechatty.mp.util.MpWechatContext;
 
 public class MpMessageDispatcher extends MessageDispatcher {
 
-	public MpMessageDispatcher(List<MessageListener<?>> msgListeners) {
-		super(MpCrypterFactory.getCrypter(), MpWechatContext.getInstance(), msgListeners);
+	public MpMessageDispatcher(AppContext appContext, List<MessageListener<?>> msgListeners) {
+		super(appContext, msgListeners);
 	}
 
 	@Override

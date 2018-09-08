@@ -73,7 +73,7 @@ public abstract class WechatContext {
 		try {
 			propsIs = this.getClass().getResourceAsStream(confPath);
 			if(propsIs == null) {
-				throw new NullPointerException("config file " + confPath + " not found!!!");
+				return;
 			}
 			props.load(propsIs);
 			fillFields(props, WechatContext.class);

@@ -12,14 +12,13 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import space.chensheng.wechatty.common.conf.WechatContext;
+import space.chensheng.wechatty.common.conf.AppContext;
 import space.chensheng.wechatty.common.message.base.EmptyInboundMessage;
 import space.chensheng.wechatty.common.message.base.EncryptedCallbackMessage;
 import space.chensheng.wechatty.common.message.base.EncryptedReplyMessage;
 import space.chensheng.wechatty.common.message.base.InboundMessage;
 import space.chensheng.wechatty.common.message.base.ReplyMessage;
 import space.chensheng.wechatty.common.security.AesException;
-import space.chensheng.wechatty.common.security.WXBizMsgCrypt;
 import space.chensheng.wechatty.common.util.ExceptionUtil;
 import space.chensheng.wechatty.common.util.XmlUtil;
 
@@ -29,38 +28,31 @@ public abstract class MessageDispatcher {
 	
 	private static final String EMPTY_RESULT = "";
 	
-	private WXBizMsgCrypt crypter;
-	
-	private WechatContext wechatContext;
+	private AppContext appContext;
 	
 	private Map<Class<?>, List<MessageListener<?>>> listenerPool;
 	
 	/**
 	 * 
-	 * @param crypter
+	 * @param appContext application context
 	 * @param msgListeners to listen wechat inbound message
-	 * @throws NullPointerException if crypter or wechatContext is null
+	 * @throws NullPointerException if appContext is null
 	 */
-	public MessageDispatcher(WXBizMsgCrypt crypter, WechatContext wechatContext, List<MessageListener<?>> msgListeners) {
-		if (crypter == null) {
-			throw new NullPointerException("crypter may not be null");
-		}
-		if (wechatContext == null) {
-			throw new NullPointerException("wechatContext may not be null");
+	public MessageDispatcher(AppContext appContext, List<MessageListener<?>> msgListeners) {
+		if (appContext == null) {
+			throw new NullPointerException("appContext may not be null");
 		}
 		
-		this.crypter = crypter;
-		this.wechatContext = wechatContext;
-		
+		this.appContext = appContext;
 		this.initListenerPool(msgListeners);
 	}
 	
 	/**
 	 * dispatch wechat inbound message to specify message listeners
-	 * @param msgSignature
-	 * @param timestamp
-	 * @param nonce
-	 * @param postStream
+	 * @param msgSignature message signature from wechat server
+	 * @param timestamp timestamp of request
+	 * @param nonce a random string
+	 * @param postStream reqeust body stream from wechat server
 	 * @return reply xml message or empty string
 	 */
 	public String dispatch(String msgSignature, String timestamp, String nonce, InputStream postStream) {
@@ -74,10 +66,10 @@ public abstract class MessageDispatcher {
 	
 	/**
 	 * dispatch wechat inbound message to specify message listeners
-	 * @param msgSignature
-	 * @param timestamp
-	 * @param nonce
-	 * @param postData
+	 * @param msgSignature message signature from wechat server
+	 * @param timestamp timestamp of request
+	 * @param nonce a random string
+	 * @param postData reqeust body stream from wechat server
 	 * @return reply xml message or empty string
 	 */
 	public String dispatch(String msgSignature, String timestamp, String nonce, String postData) {
@@ -93,7 +85,7 @@ public abstract class MessageDispatcher {
 	}
 	
 	private String resolveMsgXml(String msgSignature, String timestamp, String nonce, String postData) {
-		if (!wechatContext.getEnableCryptedMode()) {
+		if (!appContext.getWechatContext().getEnableCryptedMode()) {
 			return postData;	
 		}
 		
@@ -104,7 +96,7 @@ public abstract class MessageDispatcher {
 		EncryptedCallbackMessage message = XmlUtil.fromXMLIgnoreUnknownElements(postData, EncryptedCallbackMessage.class);
 		if (message != null) {
 			try {
-				return crypter.DecryptMsg(msgSignature, timestamp, nonce, message.getEncrypt());
+				return appContext.getWxBizMsgCrypt().DecryptMsg(msgSignature, timestamp, nonce, message.getEncrypt());
 			} catch (AesException e) {
 				logger.error(ExceptionUtil.getExceptionDetails(e));
 			}
@@ -135,13 +127,13 @@ public abstract class MessageDispatcher {
 			return EMPTY_RESULT;
 		}
 		
-		if (!wechatContext.getEnableCryptedMode()) {
+		if (!appContext.getWechatContext().getEnableCryptedMode()) {
 			return replyMsg.toString();
 		}
 		
 		EncryptedReplyMessage encryptedReply = null;
 		try {
-			encryptedReply = crypter.EncryptMsg(replyMsg, timestamp, nonce);
+			encryptedReply = appContext.getWxBizMsgCrypt().EncryptMsg(replyMsg, timestamp, nonce);
 		} catch (AesException e) {
 			logger.error(ExceptionUtil.getExceptionDetails(e));
 		}

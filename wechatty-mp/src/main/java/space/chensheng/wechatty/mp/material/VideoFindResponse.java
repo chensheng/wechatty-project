@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import space.chensheng.wechatty.common.http.BaseResponse;
 
 public class VideoFindResponse extends BaseResponse {
+	private static final long serialVersionUID = 8904809925279606199L;
+
 	@JsonProperty
 	private String title;
 	

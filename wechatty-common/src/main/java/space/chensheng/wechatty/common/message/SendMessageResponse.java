@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import space.chensheng.wechatty.common.http.BaseResponse;
 
 public class SendMessageResponse extends BaseResponse {
-	
+	private static final long serialVersionUID = -4615094287938760226L;
+
 	@JsonProperty("msg_id")
 	private String msgId;
 	

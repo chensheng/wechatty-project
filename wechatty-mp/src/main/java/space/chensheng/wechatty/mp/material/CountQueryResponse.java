@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import space.chensheng.wechatty.common.http.BaseResponse;
 
 public class CountQueryResponse extends BaseResponse {
+	private static final long serialVersionUID = -7750120952322839193L;
+
 	@JsonProperty("voice_count")
 	private Integer voiceCount;
 	

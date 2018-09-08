@@ -1,5 +1,7 @@
 package space.chensheng.wechatty.common.util;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 public class StringUtil {
 	public static boolean isEmpty(String str) {
 		if (str == null || str.trim().equals("")) {
@@ -63,5 +65,15 @@ public class StringUtil {
 			return parseToInt(str, defaultVal);
 		}
 		return defaultVal;
+	}
+	
+	public static String getRandomStr() {
+		String base = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < 16; i++) {
+			int number = ThreadLocalRandom.current().nextInt(base.length());
+			sb.append(base.charAt(number));
+		}
+		return sb.toString();
 	}
 }

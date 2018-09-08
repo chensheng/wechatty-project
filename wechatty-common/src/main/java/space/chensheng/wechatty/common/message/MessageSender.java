@@ -1,39 +1,25 @@
 package space.chensheng.wechatty.common.message;
 
-import space.chensheng.wechatty.common.conf.WechatContext;
-import space.chensheng.wechatty.common.http.AccessTokenFetcher;
-import space.chensheng.wechatty.common.http.WechatRequester;
+import space.chensheng.wechatty.common.conf.AppContext;
 import space.chensheng.wechatty.common.message.base.OutboundMessage;
 import space.chensheng.wechatty.common.util.StringUtil;
 
 public abstract class MessageSender {
-	private WechatContext wechatContext;
-	
-	private AccessTokenFetcher accessTokenFetcher;
+	private AppContext appContext;
 
 	/**
 	 * 
-	 * @param wechatContext
-	 * @param accessTokenFetcher
-	 * @throws NullPointerException if wechatContext or accessTokenFetcher is null
+	 * @param appContext application context
 	 */
-	public MessageSender(WechatContext wechatContext, AccessTokenFetcher accessTokenFetcher) {
-		if (wechatContext == null) {
-			throw new NullPointerException("wechatContext may not be null");
-		}
-		
-		if (accessTokenFetcher == null) {
-			throw new NullPointerException("accessTokenFetcher may not be null");
-		}
-		this.wechatContext = wechatContext;
-		this.accessTokenFetcher = accessTokenFetcher;
+	public MessageSender(AppContext appContext) {
+		this.appContext = appContext;
 	}
 	
 	
 	/**
 	 * send message with retry when fail to send message
-	 * @param sendUrl
-	 * @param message
+	 * @param sendUrl URL of sending message
+	 * @param message message to send
 	 * @param retry retry times, {@code <= 0} means not retry
 	 * @return null if fail to send message because of network error
 	 */
@@ -62,8 +48,8 @@ public abstract class MessageSender {
 	
 	/**
 	 * 
-	 * @param sendUrl not include "?access_token=xxx"
-	 * @param message
+	 * @param sendUrl URL of sending message, not include "?access_token=xxx"
+	 * @param message message to send
 	 * @return null if fail to send message because of network error
 	 * @throws NullPointerException if sendUrl or message is null
 	 */
@@ -76,7 +62,7 @@ public abstract class MessageSender {
 			throw new NullPointerException("message may not be null");
 		}
 		
-		String formattedSendUrl = String.format("%s?access_token=%s", sendUrl, accessTokenFetcher.getAccessToken());
-		return WechatRequester.postString(formattedSendUrl, message.toString(), SendMessageResponse.class, wechatContext, accessTokenFetcher);
+		String formattedSendUrl = String.format("%s?access_token=%s", sendUrl, appContext.getAccessTokenFetcher().getAccessToken());
+		return appContext.getWechatRequester().postString(formattedSendUrl, message.toString(), SendMessageResponse.class);
 	}
 }
