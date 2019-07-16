@@ -21,7 +21,7 @@ Wechattty Project是一个基于JAVA的微信公众号（包括服务号和订�
 <dependency>
   <groupId>space.chensheng.wechatty</groupId>
   <artifactId>wechatty-mp</artifactId>
-  <version>1.0.0</version>
+  <version>2.0.0</version>
 </dependency>
 
 ```
@@ -399,7 +399,7 @@ jsapi授权通过`JsapiHelper`实现。
 
 ### 微信支付
 
-初始化`MpAppContext`时，调用`WechatMpBootstrap`的`enablePayCert()`方法来启用微支付，并配置相关参数。(具体参数查看[配置](#配置)模块)
+初始化`MpAppContext`时，调用`WechatMpBootstrap`的`enablePayCert()`方法来启用微信支付，并配置相关参数。(具体参数查看[配置](#配置)模块)
 ```
 WechatMpBootstrap bootstrap = new WechatMpBootstrap();
 bootstrap.enablePayCert();
