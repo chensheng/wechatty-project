@@ -1,9 +1,9 @@
 package space.chensheng.wechatty.mp.jssdk;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
 import space.chensheng.wechatty.common.conf.AppContext;
+import space.chensheng.wechatty.common.util.SHA1Utils;
+import space.chensheng.wechatty.common.util.StringUtil;
+import space.chensheng.wechatty.mp.util.MpWechatContext;
 
 public class JsapiHelper {
 	private AppContext appContext;
@@ -21,6 +21,21 @@ public class JsapiHelper {
 		}
 		
 		return "";
+	}
+	
+	public JsapiAuth generateSignature(String jsapiTicket, String url) {
+		JsapiAuth auth = new JsapiAuth();
+		
+		String nonceStr = StringUtil.getRandomStr();
+		long timestamp = System.currentTimeMillis();
+		String signature = this.generateSignature(jsapiTicket, nonceStr, timestamp, url);
+		
+		MpWechatContext wechatContext = (MpWechatContext) appContext.getWechatContext();
+		auth.setAppId(wechatContext.getAppId());
+		auth.setNonceStr(nonceStr);
+		auth.setTimestamp(String.valueOf(timestamp));
+		auth.setSignature(signature);
+		return auth;
 	}
 	
 	public String generateSignature(String jsapiTicket, String nonceStr, long timestamp, String url) {
@@ -42,24 +57,6 @@ public class JsapiHelper {
 		params.append(url);
 		
 		String str = params.toString();
-		MessageDigest md;
-		try {
-			md = MessageDigest.getInstance("SHA-1");
-			md.update(str.getBytes());
-			byte[] digest = md.digest();
-
-			StringBuffer hexstr = new StringBuffer();
-			String shaHex = "";
-			for (int i = 0; i < digest.length; i++) {
-				shaHex = Integer.toHexString(digest[i] & 0xFF);
-				if (shaHex.length() < 2) {
-					hexstr.append(0);
-				}
-				hexstr.append(shaHex);
-			}
-			return hexstr.toString();
-		} catch (NoSuchAlgorithmException e) {
-			return "";
-		}
+		return SHA1Utils.encode(str);
 	}
 }

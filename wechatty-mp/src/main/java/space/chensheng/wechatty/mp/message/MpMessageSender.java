@@ -4,6 +4,7 @@ import space.chensheng.wechatty.common.message.MessageSender;
 import space.chensheng.wechatty.common.message.SendMessageResponse;
 import space.chensheng.wechatty.mp.message.outbound.CsOutboundMessage;
 import space.chensheng.wechatty.mp.message.outbound.MassOutboundMessage;
+import space.chensheng.wechatty.mp.message.template.TemplateMessage;
 import space.chensheng.wechatty.mp.util.MpAppContext;
 
 public class MpMessageSender extends MessageSender {
@@ -47,7 +48,8 @@ public class MpMessageSender extends MessageSender {
 	 * send mass message with retry
 	 * @param message
 	 * @param retry
-	 * @return NullPointerException if message is null
+	 * @return 
+	 * @throws NullPointerException if message is null
 	 */
 	public SendMessageResponse send(MassOutboundMessage message, int retry) {
 		if (message == null) {
@@ -59,5 +61,30 @@ public class MpMessageSender extends MessageSender {
 		}
 		
 		return doSendMessageWithRetry("https://api.weixin.qq.com/cgi-bin/message/mass/sendall", message, retry);
+	}
+	
+	/**
+	 * Send template message without retry.
+	 * @param message
+	 * @return
+	 * @throws NullPointerException if message is null
+	 */
+	public SendMessageResponse send(TemplateMessage message) {
+		return this.send(message, 0);
+	}
+	
+	/**
+	 * Send template message with retry.
+	 * @param message
+	 * @param retry
+	 * @return
+	 * @throws NullPointerException if message is null
+	 */
+	public SendMessageResponse send(TemplateMessage message, int retry) {
+		if (message == null) {
+			throw new NullPointerException("message may not be null");
+		}
+		
+		return doSendMessageWithRetry("https://api.weixin.qq.com/cgi-bin/message/template/send", message, retry);
 	}
 }

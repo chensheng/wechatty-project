@@ -35,6 +35,17 @@ public class QRCodeCreator {
 	}
 	
 	/**
+	 * create temporary QRCode, it will expire in {@code expireSeconds}
+	 * @param expireSeconds {@code >= 30 && <= 2592000}, 30 seconds to 30 days
+	 * @param sceneStr length is 1 to 64
+	 * @return null if network error
+	 */
+	public QRCodeResponse createTemporary(int expireSeconds, String sceneStr) {
+		PostData postData = PostData.createTemporaryPostData(expireSeconds, sceneStr);
+		return doCreate(postData);
+	}
+	
+	/**
 	 * create permanent QRCode with sceneId
 	 * @param sceneId {@code >= 1 && <= 100000}
 	 * @return null if network error
@@ -84,6 +95,20 @@ public class QRCodeCreator {
 			result.expireSeconds = expireSeconds;
 			result.actionName = "QR_SCENE";
 			result.actionInfo.scene.sceneId = sceneId;
+			return result;
+		}
+		
+		static PostData createTemporaryPostData(int expireSeconds, String sceneStr) {
+			if (expireSeconds < 30) {
+				expireSeconds = 30;
+			} else if (expireSeconds > 2592000) {
+				expireSeconds = 2592000;
+			}
+			
+			PostData result = new PostData();
+			result.expireSeconds = expireSeconds;
+			result.actionName = "QR_STR_SCENE";
+			result.actionInfo.scene.sceneStr = sceneStr;
 			return result;
 		}
 		

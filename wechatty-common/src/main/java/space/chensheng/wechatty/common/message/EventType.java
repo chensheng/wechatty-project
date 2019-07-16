@@ -15,7 +15,8 @@ public enum EventType {
 	LOCATION_SELECT("location_select"),
 	ENTER_AGENT("enter_agent"),
 	BATCH_JOB_RESULT("batch_job_result"),
-	MASSSENDJOBFINISH("MASSSENDJOBFINISH");
+	MASSSENDJOBFINISH("MASSSENDJOBFINISH"),
+	TEMPLATESENDJOBFINISH("TEMPLATESENDJOBFINISH");
 	
 	private String value;
 	

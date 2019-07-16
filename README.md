@@ -408,3 +408,13 @@ bootstrap.enablePayCert();
 * 发送普通红包: `mpAppContext.getPayHelper().sendRedPack(RedPackRequest request)`
 * 发送群红包: `mpAppContext.getPayHelper().sendGroupRedPack(GroupRedPackRequest request)`
 * 转账: `mpAppContext.getPayHelper().transfers(TransfersRequest request)`
+* 生成预付款订单: `mpAppContext.getPayHelper().unifiedOrder(UnifiedOrderRequest request)`
+* 解析支付回调: `mpAppContext.getPayHelper().parsePayNotify(String notifyContent)`
+* 校验支付回调: `mpAppContext.getPayHelper().validatePayNotify(PayNotifyResponse response)`
+* 支付订单查询: `mpAppContext.getPayHelper().orderQuery(OrderQueryRequest request)`
+* 关闭支付订单: `mpAppContext.getPayHelper().closeOrder(CloseOrderRequest request)` 
+* 生成短链接: `mpAppContext.getPayHelper().shortUrl(String longUrl)`
+* 生成js支付参数: `mpAppContext.getPayHelper().generateJsapiPayParams(String prepayId, PaySignType signType)`
+* 发起退款: `mpAppContext.getPayHelper().refund(RefundRequest request)`
+* 解析退款回调: `mpAppContext.getPayHelper().parseRefundNotify(String notifyContent)`
+* 

@@ -11,10 +11,12 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 import space.chensheng.wechatty.common.util.ExceptionUtil;
 import space.chensheng.wechatty.common.util.MD5Utils;
+import space.chensheng.wechatty.common.util.SHA1Utils;
 import space.chensheng.wechatty.common.util.StringUtil;
 import space.chensheng.wechatty.mp.util.MpAppContext;
 import space.chensheng.wechatty.mp.util.MpWechatContext;
@@ -24,11 +26,21 @@ public class PaySignTool {
 	
 	private static final String EMPTY_STRING = "";
 	
+	private static final String PARAM_SIGN = "sign";
+	
+	private static final String PARAM_SIGN_TYPE = "sign_type";
+	
 	public static String sign(Map<String, Object> params, MpAppContext appContext) {
 		MpWechatContext wechatContext = (MpWechatContext) appContext.getWechatContext();
 		String sortedParams = sortParams(params);
 		String unsignParams = String.format("%s&key=%s", sortedParams, wechatContext.getPayKey());		
-		return MD5Utils.md5With32(unsignParams).toUpperCase();
+		
+		Object signType = params.get(PARAM_SIGN_TYPE);
+		if (signType != null && signType.toString().equals(PaySignType.SHA1.toString())) {
+			return SHA1Utils.encode(unsignParams).toUpperCase();
+		} else {
+			return MD5Utils.md5With32(unsignParams).toUpperCase();
+		}
 	}
 	
 	public static String sign(Object params, MpAppContext appContext) {
@@ -58,8 +70,13 @@ public class PaySignTool {
 				
 				String name = field.getName();
 				XStreamAlias alias = field.getAnnotation(XStreamAlias.class);
-				if (alias != null) {
+				if (alias != null && StringUtil.isNotEmpty(alias.value())) {
 					name = alias.value();
+				}
+				
+				JsonProperty jsonProp = field.getAnnotation(JsonProperty.class);
+				if (jsonProp != null && StringUtil.isNotEmpty(jsonProp.value())) {
+					name = jsonProp.value();
 				}
 				
 				map.put(name, value);
@@ -88,6 +105,9 @@ public class PaySignTool {
 		
 		StringBuilder sortedParams = new StringBuilder();
 		for (String name : names) {
+			if (PARAM_SIGN.equals(name)) {
+				continue;
+			}
 			Object value = params.get(name);
 			if (value == null || StringUtil.isEmpty(value.toString())) {
 				continue;

@@ -14,7 +14,8 @@ public enum MessageType {
 	NEWS("news"),
 	MPNEWS("mpnews"),
 	MUSIC("music"),
-	WXCARD("wxcard");
+	WXCARD("wxcard"),
+	TRANSFER_CUSTOMER_SERVICE("transfer_customer_service");
 	
 	private String value;
 	

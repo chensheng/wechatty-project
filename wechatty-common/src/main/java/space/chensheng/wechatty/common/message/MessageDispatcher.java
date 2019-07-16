@@ -65,7 +65,7 @@ public abstract class MessageDispatcher {
 	}
 	
 	/**
-	 * dispatch wechat inbound message to specify message listeners
+	 * dispatch wechat inbound message to specified message listeners
 	 * @param msgSignature message signature from wechat server
 	 * @param timestamp timestamp of request
 	 * @param nonce a random string

@@ -25,6 +25,10 @@ public class MpWechatContext extends WechatContext {
 	
 	private String payClientIp;
 	
+	private String payNotifyUrl;
+	
+	private String refundNotifyUrl;
+	
 	public MpWechatContext() {
 		this(CUSTOMER_CONF_PATH);
 	}
@@ -103,5 +107,21 @@ public class MpWechatContext extends WechatContext {
 
 	public void setPayClientIp(String payClientIp) {
 		this.payClientIp = payClientIp;
+	}
+
+	public String getPayNotifyUrl() {
+		return payNotifyUrl;
+	}
+
+	public void setPayNotifyUrl(String payNotifyUrl) {
+		this.payNotifyUrl = payNotifyUrl;
+	}
+
+	public String getRefundNotifyUrl() {
+		return refundNotifyUrl;
+	}
+
+	public void setRefundNotifyUrl(String refundNotifyUrl) {
+		this.refundNotifyUrl = refundNotifyUrl;
 	}
 }

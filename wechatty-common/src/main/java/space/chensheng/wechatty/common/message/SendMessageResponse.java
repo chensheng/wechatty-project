@@ -12,6 +12,9 @@ public class SendMessageResponse extends BaseResponse {
 	
 	@JsonProperty("msg_data_id")
 	private String msgDataId;
+	
+	@JsonProperty("msgid")
+	private String msgid;
 
 	public String getMsgId() {
 		return msgId;
@@ -27,5 +30,13 @@ public class SendMessageResponse extends BaseResponse {
 
 	public void setMsgDataId(String msgDataId) {
 		this.msgDataId = msgDataId;
+	}
+
+	public String getMsgid() {
+		return msgid;
+	}
+
+	public void setMsgid(String msgid) {
+		this.msgid = msgid;
 	}
 }

@@ -1,8 +1,17 @@
 package space.chensheng.wechatty.common.util;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class StringUtil {
+	private static final Logger logger = LoggerFactory.getLogger(StringUtil.class);
+	
 	public static boolean isEmpty(String str) {
 		if (str == null || str.trim().equals("")) {
 			return true;
@@ -75,5 +84,27 @@ public class StringUtil {
 			sb.append(base.charAt(number));
 		}
 		return sb.toString();
+	}
+	
+	public static String readInputStream(InputStream is) {
+		StringBuilder result = new StringBuilder();
+		String line = null;
+		
+		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+		try {
+			while ((line = reader.readLine()) != null) {
+				result.append(line);
+			}
+		} catch (IOException e) {
+			logger.error(ExceptionUtil.getExceptionDetails(e));
+		} finally {
+			try {
+				reader.close();
+			} catch (IOException e) {
+				logger.error(ExceptionUtil.getExceptionDetails(e));
+			}
+		}
+		
+		return result.toString();
 	}
 }
