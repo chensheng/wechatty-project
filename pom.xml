@@ -40,7 +40,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit.version>3.8.1</junit.version>
     <commons-codec.version>1.9</commons-codec.version>
-    <xstream.version>1.4.7</xstream.version>
+    <xstream.version>1.4.18</xstream.version>
     <jackson.version>2.9.9</jackson.version>
     <slf4j.version>1.7.7</slf4j.version>
     <log4j.version>1.2.14</log4j.version>
