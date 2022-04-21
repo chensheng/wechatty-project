@@ -1,21 +1,6 @@
 package space.chensheng.wechatty.common.http;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
-
-import org.apache.http.Consts;
-import org.apache.http.Header;
-import org.apache.http.HeaderElement;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.ParseException;
+import org.apache.http.*;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -28,9 +13,14 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import space.chensheng.wechatty.common.conf.AppContext;
 import space.chensheng.wechatty.common.util.ExceptionUtil;
+
+import java.io.*;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
 
 public class PoolingHttpUtil {
 	private static final Logger logger = LoggerFactory.getLogger(PoolingHttpUtil.class);
@@ -47,7 +37,7 @@ public class PoolingHttpUtil {
 		try {
 			response = poolingHttpClient.get().execute(httpGet);
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-				return EntityUtils.toString(response.getEntity());
+				return EntityUtils.toString(response.getEntity(), Consts.UTF_8);
 			}
 			if (response != null) {
 				EntityUtils.consume(response.getEntity());
@@ -83,7 +73,7 @@ public class PoolingHttpUtil {
 			httpPost.setEntity(new StringEntity(postString, Consts.UTF_8));
 			response = poolingHttpClient.get().execute(httpPost);
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-				return EntityUtils.toString(response.getEntity());
+				return EntityUtils.toString(response.getEntity(), Consts.UTF_8);
 			}
 			if (response != null) {
 				EntityUtils.consume(response.getEntity());
