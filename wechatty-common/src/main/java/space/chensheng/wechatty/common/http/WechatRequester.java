@@ -47,9 +47,6 @@ public class WechatRequester {
 		
 		try {
 			String responseStr = appContext.getPoolingHttpUtil().get(url);
-			if (responseStr != null) {
-				responseStr = new String(responseStr.getBytes("ISO-8859-1"), "UTF-8");
-			}
 			response = JsonMapper.nonEmptyMapper().fromJson(responseStr, retClzz);
 			appContext.getAccessTokenFetcher().updateIfNecessary(response);
 		} catch (ClientProtocolException e) {
@@ -82,9 +79,6 @@ public class WechatRequester {
 		
 		try {
 			String responseStr = appContext.getPoolingHttpUtil().postString(url, postString);
-			if (responseStr != null) {
-				responseStr = new String(responseStr.getBytes("ISO-8859-1"), "UTF-8");
-			}
 			response = JsonMapper.nonEmptyMapper().fromJson(responseStr, retClzz);
 			appContext.getAccessTokenFetcher().updateIfNecessary(response);
 		} catch (ClientProtocolException e) {
@@ -117,9 +111,6 @@ public class WechatRequester {
 		
 		try {
 			String responseStr = appContext.getPoolingHttpUtil().postMultipart(url, postData);
-			if (responseStr != null) {
-				responseStr = new String(responseStr.getBytes("ISO-8859-1"), "UTF-8");
-			}
 			response = JsonMapper.nonEmptyMapper().fromJson(responseStr, retClzz);
 			appContext.getAccessTokenFetcher().updateIfNecessary(response);
 		} catch (ClientProtocolException e) {

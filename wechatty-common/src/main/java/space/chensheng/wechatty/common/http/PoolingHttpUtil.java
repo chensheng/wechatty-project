@@ -117,7 +117,7 @@ public class PoolingHttpUtil {
 			httpPost.setEntity(meBuilder.build());
 			response = poolingHttpClient.get().execute(httpPost);
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-				return EntityUtils.toString(response.getEntity());
+				return EntityUtils.toString(response.getEntity(), Consts.UTF_8);
 			}
 			if (response != null) {
 				EntityUtils.consume(response.getEntity());
