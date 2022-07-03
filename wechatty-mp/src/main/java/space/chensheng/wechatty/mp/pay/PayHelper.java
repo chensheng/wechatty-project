@@ -1,15 +1,14 @@
 package space.chensheng.wechatty.mp.pay;
 
-import java.io.InputStream;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import space.chensheng.wechatty.common.security.Aes256EcbCrypt;
 import space.chensheng.wechatty.common.util.StringUtil;
 import space.chensheng.wechatty.common.util.XmlUtil;
 import space.chensheng.wechatty.mp.util.MpAppContext;
 import space.chensheng.wechatty.mp.util.MpWechatContext;
+
+import java.io.InputStream;
 
 public class PayHelper {
 	private static final Logger logger = LoggerFactory.getLogger(PayHelper.class);
@@ -402,6 +401,38 @@ public class PayHelper {
 		request.setRefundFee(refundFee);
 		request.setRefundDesc(refundDesc);
 		return this.refund(request);
+	}
+
+	/**
+	 * Query refund
+	 * @param request
+	 * @return
+	 */
+	public RefundQueryResponse refundQuery(RefundQueryRequest request) {
+		MpWechatContext wechatContext = getWechatContext();
+
+		request.setAppId(wechatContext.getAppId());
+		request.setMchId(wechatContext.getPayMchId());
+		request.setNonceStr(StringUtil.getRandomStr());
+
+		String sign = PaySignTool.sign(request, appContext);
+		request.setSign(sign);
+
+		String url = "https://api.mch.weixin.qq.com/pay/refundquery";
+		return appContext.getWechatRequester().postStringAndRespXml(url, request.toString(), RefundQueryResponse.class);
+	}
+
+	/**
+	 * Query refund
+	 * @param outRefundNo required when outTradeNo is null
+	 * @param outTradeNo required when outRefundNo is null
+	 * @return
+	 */
+	public RefundQueryResponse refundQuery(String outRefundNo, String outTradeNo) {
+		RefundQueryRequest request = new RefundQueryRequest();
+		request.setOutRefundNo(outRefundNo);
+		request.setOutTradeNo(outTradeNo);
+		return this.refundQuery(request);
 	}
 	
 	/**
