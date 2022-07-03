@@ -58,6 +58,10 @@ public class RefundNotifyReqInfo {
 	@XStreamCDATA
 	private String refundRequestSource;
 
+	@XStreamAlias("cash_refund_fee")
+	@XStreamCDATA
+	private Integer cashRefundFee;
+
 	public String getTransactionId() {
 		return transactionId;
 	}
@@ -164,5 +168,13 @@ public class RefundNotifyReqInfo {
 	
 	public boolean isRefundSuccess() {
 		return "SUCCESS".equals(refundStatus);
+	}
+
+	public Integer getCashRefundFee() {
+		return cashRefundFee;
+	}
+
+	public void setCashRefundFee(Integer cashRefundFee) {
+		this.cashRefundFee = cashRefundFee;
 	}
 }
