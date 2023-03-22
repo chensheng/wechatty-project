@@ -1,8 +1,6 @@
 package space.chensheng.wechatty.mp.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import space.chensheng.wechatty.common.http.AccessTokenFetcher;
 import space.chensheng.wechatty.common.http.PoolingHttpUtil;
 import space.chensheng.wechatty.common.http.WechatRequester;
 import space.chensheng.wechatty.common.material.MultiPartUploader;
@@ -20,20 +18,22 @@ import space.chensheng.wechatty.mp.material.MaterialQuery;
 import space.chensheng.wechatty.mp.menu.MenuHelper;
 import space.chensheng.wechatty.mp.message.MpMessageDispatcher;
 import space.chensheng.wechatty.mp.message.MpMessageSender;
-import space.chensheng.wechatty.mp.pay.PayCertHttpCustomizer;
 import space.chensheng.wechatty.mp.pay.PayHelper;
 import space.chensheng.wechatty.mp.user.UserInfoQuery;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class WechatMpBootstrap {
 	private MpAppContext appContext;
 	
 	private String confFilePath;
 	
-	private MpWechatContextCustomizer wechatContextCustomizer;
-	
-	private PayCertHttpCustomizer payCertHttpCustomizer;
+	private boolean enablePayCert;
 	
 	private List<MessageListener<?>> msgListeners = new ArrayList<MessageListener<?>>();
+
+	private List<MpWechatContextCustomizer> wechatContextCustomizers = new ArrayList<MpWechatContextCustomizer>();
 	
 	public WechatMpBootstrap() {
 	}
@@ -43,12 +43,14 @@ public class WechatMpBootstrap {
 	}
 	
 	public WechatMpBootstrap customizeWechatContext(MpWechatContextCustomizer customizer) {
-		this.wechatContextCustomizer = customizer;
+		if(customizer != null) {
+			wechatContextCustomizers.add(customizer);
+		}
 		return this;
 	}
 	
 	public WechatMpBootstrap enablePayCert() {
-		payCertHttpCustomizer = new PayCertHttpCustomizer();
+		enablePayCert = true;
 		return this;
 	}
 	
@@ -65,31 +67,38 @@ public class WechatMpBootstrap {
 		}
 		
 		appContext = new MpAppContext();
-		
-		MpWechatContext wechatContext = null;
-		if (StringUtil.isNotEmpty(confFilePath)) {
-			wechatContext = new MpWechatContext(confFilePath);
+
+		if (this.wechatContextCustomizers != null && this.wechatContextCustomizers.size() > 0) {
+			for(MpWechatContextCustomizer customizer : this.wechatContextCustomizers) {
+				MpWechatContext wechatContext;
+				if (StringUtil.isNotEmpty(confFilePath)) {
+					wechatContext = new MpWechatContext(confFilePath);
+				} else {
+					wechatContext = new MpWechatContext();
+				}
+				customizer.customize(wechatContext);
+				appContext.addWechatContext(wechatContext);
+			}
 		} else {
-			wechatContext = new MpWechatContext();
+			MpWechatContext wechatContext;
+			if (StringUtil.isNotEmpty(confFilePath)) {
+				wechatContext = new MpWechatContext(confFilePath);
+			} else {
+				wechatContext = new MpWechatContext();
+			}
+			appContext.addWechatContext(wechatContext);
 		}
 		
-		if (this.wechatContextCustomizer != null) {
-			this.wechatContextCustomizer.customize(wechatContext);
-		}
-		appContext.setWechatContext(wechatContext);
-		
-		appContext.setHttpClientCustomizer(payCertHttpCustomizer);
-		
-		PoolingHttpUtil poolingHttpUtil = new PoolingHttpUtil(appContext);
+		PoolingHttpUtil poolingHttpUtil = new MpPoolingHttpUtil(appContext, enablePayCert);
 		appContext.setPoolingHttpUtil(poolingHttpUtil);
 		
-		WXBizMsgCrypt wxBizMsgCrypt = new WXBizMsgCrypt(wechatContext.getToken(), wechatContext.getAesKey(), wechatContext.getAppId());
+		WXBizMsgCrypt wxBizMsgCrypt = new MpBizMsgCrypt(appContext);
 		appContext.setWxBizMsgCrypt(wxBizMsgCrypt);
 		
 		WechatCallbackModeVerifier callbackModeVerifier = new WechatCallbackModeVerifier(appContext);
 		appContext.setCallbackModeVerifier(callbackModeVerifier);
 		
-		MpAccessTokenFetcher accessTokenFetcher = new MpAccessTokenFetcher(appContext);
+		AccessTokenFetcher accessTokenFetcher = new DelegateAccessTokenFetcher(appContext);
 		appContext.setAccessTokenFetcher(accessTokenFetcher);
 		
 		WechatRequester wechatRequester = new WechatRequester(appContext);

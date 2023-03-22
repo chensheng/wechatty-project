@@ -1,5 +1,13 @@
 package space.chensheng.wechatty.common.message;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import space.chensheng.wechatty.common.conf.AppContext;
+import space.chensheng.wechatty.common.message.base.*;
+import space.chensheng.wechatty.common.security.AesException;
+import space.chensheng.wechatty.common.util.ExceptionUtil;
+import space.chensheng.wechatty.common.util.XmlUtil;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,19 +16,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import space.chensheng.wechatty.common.conf.AppContext;
-import space.chensheng.wechatty.common.message.base.EmptyInboundMessage;
-import space.chensheng.wechatty.common.message.base.EncryptedCallbackMessage;
-import space.chensheng.wechatty.common.message.base.EncryptedReplyMessage;
-import space.chensheng.wechatty.common.message.base.InboundMessage;
-import space.chensheng.wechatty.common.message.base.ReplyMessage;
-import space.chensheng.wechatty.common.security.AesException;
-import space.chensheng.wechatty.common.util.ExceptionUtil;
-import space.chensheng.wechatty.common.util.XmlUtil;
 
 public abstract class MessageDispatcher {
 	
@@ -164,7 +159,7 @@ public abstract class MessageDispatcher {
 		List<MessageListener<?>> listeners = listenerPool.get(message.getClass());
 		if (listeners != null && !listeners.isEmpty()) {
 			for (MessageListener<?> listener : listeners) {
-				result = listener.handleMessage(message);
+				result = listener.handleMessage(appContext.getWechatContext(), message);
 			}
 		}
 

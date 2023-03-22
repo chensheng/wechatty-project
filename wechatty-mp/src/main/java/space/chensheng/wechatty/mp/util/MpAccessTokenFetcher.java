@@ -1,14 +1,10 @@
 package space.chensheng.wechatty.mp.util;
 
-import space.chensheng.wechatty.common.conf.AppContext;
-import space.chensheng.wechatty.common.http.AccessTokenFetcher;
+import space.chensheng.wechatty.common.http.AbstractAccessTokenFetcher;
 
-public class MpAccessTokenFetcher extends AccessTokenFetcher {
-	
-	public MpAccessTokenFetcher(AppContext appContext) {
+public class MpAccessTokenFetcher extends AbstractAccessTokenFetcher {
+	public MpAccessTokenFetcher(MpAppContext appContext, MpWechatContext wechatContext) {
 		super(String.format("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s", 
-				((MpWechatContext)(appContext.getWechatContext())).getAppId(), 
-				((MpWechatContext)(appContext.getWechatContext())).getAppSecret()), appContext);
+				wechatContext.getAppId(), wechatContext.getAppSecret()), appContext);
 	}
-	
 }

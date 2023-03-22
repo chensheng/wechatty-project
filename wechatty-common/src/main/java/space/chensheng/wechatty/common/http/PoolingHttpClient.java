@@ -14,8 +14,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-
-import space.chensheng.wechatty.common.conf.AppContext;
 import space.chensheng.wechatty.common.conf.WechatContext;
 import space.chensheng.wechatty.common.util.StringUtil;
 
@@ -24,13 +22,13 @@ public class PoolingHttpClient {
 	
 	private CloseableHttpClient httpClient;
 	
-	public PoolingHttpClient(AppContext appContext) {
-		this.wechatContext = appContext.getWechatContext();
+	public PoolingHttpClient(WechatContext wechatContext, HttpClientCustomizer customizer) {
+		this.wechatContext = wechatContext;
 		
 		PoolingHttpClientConnectionManager poolingConnMgr = null;
 		Registry<ConnectionSocketFactory> registry = null;
-		if (appContext.getHttpClientCustomizer() != null) {
-			registry = appContext.getHttpClientCustomizer().createRegistry(appContext);
+		if (customizer != null) {
+			registry = customizer.createRegistry(wechatContext);
 		}
 		if (registry == null) {
 			poolingConnMgr = new PoolingHttpClientConnectionManager();
@@ -68,8 +66,8 @@ public class PoolingHttpClient {
 			}
 		}
 		
-		if (appContext.getHttpClientCustomizer() != null) {
-			appContext.getHttpClientCustomizer().customize(httpClientBuilder, appContext);
+		if (customizer != null) {
+			customizer.customize(httpClientBuilder, wechatContext);
 		}
 		
 		httpClient = httpClientBuilder.build();

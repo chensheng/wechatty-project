@@ -124,4 +124,9 @@ public class MpWechatContext extends WechatContext {
 	public void setRefundNotifyUrl(String refundNotifyUrl) {
 		this.refundNotifyUrl = refundNotifyUrl;
 	}
+
+	@Override
+	public String getContextId() {
+		return appId;
+	}
 }

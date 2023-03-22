@@ -66,6 +66,8 @@ public abstract class WechatContext {
 		checkNotNull(WechatContext.class);
 		checkNotNull(getClass());
 	}
+
+	public abstract String getContextId();
 	
 	protected void loadContext(String confPath) {
 		Properties props = new Properties();

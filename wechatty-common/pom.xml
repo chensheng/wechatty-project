@@ -6,7 +6,7 @@
   <parent>
     <groupId>space.chensheng.wechatty</groupId>
     <artifactId>wechatty-project</artifactId>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
   </parent>
   <artifactId>wechatty-common</artifactId>
   

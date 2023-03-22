@@ -13,7 +13,6 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import space.chensheng.wechatty.common.conf.AppContext;
 import space.chensheng.wechatty.common.util.ExceptionUtil;
 
 import java.io.*;
@@ -22,20 +21,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
-public class PoolingHttpUtil {
+public abstract class PoolingHttpUtil {
 	private static final Logger logger = LoggerFactory.getLogger(PoolingHttpUtil.class);
-	
-	private PoolingHttpClient poolingHttpClient;
-	
-	public PoolingHttpUtil(AppContext appContext) {
-		poolingHttpClient = new PoolingHttpClient(appContext);
-	}
+
+	protected abstract PoolingHttpClient getClient();
 	
 	public String get(String url) throws ClientProtocolException, IOException {
 		HttpGet httpGet = new HttpGet(url);
 		CloseableHttpResponse response = null;
 		try {
-			response = poolingHttpClient.get().execute(httpGet);
+			response = getClient().get().execute(httpGet);
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 				return EntityUtils.toString(response.getEntity(), Consts.UTF_8);
 			}
@@ -71,7 +66,7 @@ public class PoolingHttpUtil {
 		
 		try {
 			httpPost.setEntity(new StringEntity(postString, Consts.UTF_8));
-			response = poolingHttpClient.get().execute(httpPost);
+			response = getClient().get().execute(httpPost);
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 				return EntityUtils.toString(response.getEntity(), Consts.UTF_8);
 			}
@@ -115,7 +110,7 @@ public class PoolingHttpUtil {
 		CloseableHttpResponse response = null;
 		try {
 			httpPost.setEntity(meBuilder.build());
-			response = poolingHttpClient.get().execute(httpPost);
+			response = getClient().get().execute(httpPost);
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 				return EntityUtils.toString(response.getEntity(), Consts.UTF_8);
 			}
@@ -157,7 +152,7 @@ public class PoolingHttpUtil {
 		
 		try {
 			httpPost.setEntity(new StringEntity(postString, Consts.UTF_8));
-			response = poolingHttpClient.get().execute(httpPost);
+			response = getClient().get().execute(httpPost);
 			file = doDownload(response, downloadDir, fileName, ignoreContentTypes);
 			if (response != null) {
 				EntityUtils.consume(response.getEntity());
@@ -192,7 +187,7 @@ public class PoolingHttpUtil {
 		CloseableHttpResponse response  = null;
 		
 		try {
-			response = poolingHttpClient.get().execute(httpGet);
+			response = getClient().get().execute(httpGet);
 			file = doDownload(response, downloadDir, fileName, ignoreContentTypes);
 			if (response != null) {
 				EntityUtils.consume(response.getEntity());

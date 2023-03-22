@@ -1,16 +1,23 @@
 package space.chensheng.wechatty.common.conf;
 
 import space.chensheng.wechatty.common.http.AccessTokenFetcher;
-import space.chensheng.wechatty.common.http.HttpClientCustomizer;
 import space.chensheng.wechatty.common.http.PoolingHttpUtil;
 import space.chensheng.wechatty.common.http.WechatRequester;
 import space.chensheng.wechatty.common.material.MultiPartUploader;
 import space.chensheng.wechatty.common.material.StringBodyUploader;
 import space.chensheng.wechatty.common.security.WXBizMsgCrypt;
 import space.chensheng.wechatty.common.security.WechatCallbackModeVerifier;
+import space.chensheng.wechatty.common.util.StringUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AppContext {
-	private WechatContext wechatContext;
+	private ThreadLocal<String> currentWechatContextId = new ThreadLocal<String>();
+
+	private WechatContext defaultWechatContext;
+
+	private List<WechatContext> wechatContexts = new ArrayList<WechatContext>();
 	
 	private WXBizMsgCrypt wxBizMsgCrypt;
 	
@@ -24,17 +31,7 @@ public class AppContext {
 	
 	private StringBodyUploader stringBodyUploader;
 	
-	private HttpClientCustomizer httpClientCustomizer;
-	
 	private PoolingHttpUtil poolingHttpUtil;
-
-	public WechatContext getWechatContext() {
-		return wechatContext;
-	}
-
-	public void setWechatContext(WechatContext wechatContext) {
-		this.wechatContext = wechatContext;
-	}
 
 	public WXBizMsgCrypt getWxBizMsgCrypt() {
 		return wxBizMsgCrypt;
@@ -84,14 +81,6 @@ public class AppContext {
 		this.stringBodyUploader = stringBodyUploader;
 	}
 
-	public HttpClientCustomizer getHttpClientCustomizer() {
-		return httpClientCustomizer;
-	}
-
-	public void setHttpClientCustomizer(HttpClientCustomizer httpClientCustomizer) {
-		this.httpClientCustomizer = httpClientCustomizer;
-	}
-
 	public PoolingHttpUtil getPoolingHttpUtil() {
 		return poolingHttpUtil;
 	}
@@ -100,4 +89,40 @@ public class AppContext {
 		this.poolingHttpUtil = poolingHttpUtil;
 	}
 
+	public void switchWechatContext(String contextId) {
+		currentWechatContextId.set(contextId);
+	}
+
+	public void addWechatContext(WechatContext wechatContext) {
+		if(wechatContext == null) {
+			return;
+		}
+
+		if(this.defaultWechatContext == null) {
+			this.defaultWechatContext = wechatContext;
+		}
+		wechatContexts.add(wechatContext);
+	}
+
+	public void setWechatContext(WechatContext wechatContext) {
+		this.addWechatContext(wechatContext);
+	}
+
+	public WechatContext getWechatContext() {
+		String contextId = currentWechatContextId.get();
+		if(StringUtil.isEmpty(contextId) || wechatContexts.size() == 0) {
+			return defaultWechatContext;
+		}
+
+		for(WechatContext wechatContext : wechatContexts) {
+			if(contextId.equals(wechatContext.getContextId())) {
+				return wechatContext;
+			}
+		}
+		return defaultWechatContext;
+	}
+
+	public List<WechatContext> getWechatContexts() {
+		return wechatContexts;
+	}
 }

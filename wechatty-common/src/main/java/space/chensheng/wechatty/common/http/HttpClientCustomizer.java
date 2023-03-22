@@ -5,9 +5,10 @@ import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import space.chensheng.wechatty.common.conf.AppContext;
+import space.chensheng.wechatty.common.conf.WechatContext;
 
 public interface HttpClientCustomizer {
-	Registry<ConnectionSocketFactory> createRegistry(AppContext appContext);
+	Registry<ConnectionSocketFactory> createRegistry(WechatContext wechatContext);
 	
-	void customize(HttpClientBuilder builder, AppContext appContext);
+	void customize(HttpClientBuilder builder, WechatContext wechatContext);
 }

@@ -1,6 +1,7 @@
 package space.chensheng.wechatty.mp.jssdk;
 
 import space.chensheng.wechatty.common.conf.AppContext;
+import space.chensheng.wechatty.common.conf.WechatContext;
 import space.chensheng.wechatty.common.util.SHA1Utils;
 import space.chensheng.wechatty.common.util.StringUtil;
 import space.chensheng.wechatty.mp.util.MpWechatContext;
@@ -21,6 +22,24 @@ public class JsapiHelper {
 		}
 		
 		return "";
+	}
+
+	public String fetchTicket(WechatContext wechatContext) {
+		if(wechatContext == null) {
+			return fetchTicket();
+		}
+
+		WechatContext originalWechatContext = appContext.getWechatContext();
+		try {
+			appContext.switchWechatContext(wechatContext.getContextId());
+			return fetchTicket();
+		} finally {
+			if(originalWechatContext != null) {
+				appContext.switchWechatContext(originalWechatContext.getContextId());
+			} else {
+				appContext.switchWechatContext(null);
+			}
+		}
 	}
 	
 	public JsapiAuth generateSignature(String jsapiTicket, String url) {

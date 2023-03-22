@@ -1,17 +1,15 @@
 package space.chensheng.wechatty.common.security;
 
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.concurrent.ThreadLocalRandom;
+import org.apache.commons.codec.binary.Base64;
+import space.chensheng.wechatty.common.message.base.EncryptedReplyMessage;
+import space.chensheng.wechatty.common.message.base.ReplyMessage;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
-import org.apache.commons.codec.binary.Base64;
-
-import space.chensheng.wechatty.common.message.base.EncryptedReplyMessage;
-import space.chensheng.wechatty.common.message.base.ReplyMessage;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 提供接收和推送给公众平台消息的加解密接口(UTF8编码的字符串).
@@ -28,23 +26,27 @@ import space.chensheng.wechatty.common.message.base.ReplyMessage;
  * 	<li>如果安装了JDK，将两个jar文件放到%JDK_HOME%\jre\lib\security目录下覆盖原来文件</li>
  * </ol>
  */
-public class WXBizMsgCrypt {
+public abstract class WXBizMsgCrypt {
 	static Charset CHARSET = Charset.forName("utf-8");
 	Base64 base64 = new Base64();
-	byte[] aesKey;
-	String token;
-	String appId;
 
 	/**
-	 * 构造函数
-	 * @param token 公众平台上，开发者设置的token
-	 * @param encodingAesKey 公众平台上，开发者设置的EncodingAESKey
-	 * @param appId application id
+	 * @return 公众号appId
 	 */
-	public WXBizMsgCrypt(String token, String encodingAesKey, String appId) {
-		this.token = token;
-		this.appId = appId;
-		aesKey = Base64.decodeBase64(encodingAesKey + "=");
+	protected abstract String getAppId();
+
+	/**
+	 * @return 公众平台上，开发者设置的token
+	 */
+	protected abstract String getToken();
+
+	/**
+	 * @return 公众平台上，开发者设置的EncodingAESKey
+	 */
+	protected abstract String getEncodingAesKey();
+
+	private byte[] getAesKey() {
+		return Base64.decodeBase64(getEncodingAesKey() + "=");
 	}
 
 	byte[] getNetworkBytesOrder(int sourceNumber) {
@@ -87,7 +89,7 @@ public class WXBizMsgCrypt {
 		byte[] randomStrBytes = randomStr.getBytes(CHARSET);
 		byte[] textBytes = text.getBytes(CHARSET);
 		byte[] networkBytesOrder = getNetworkBytesOrder(textBytes.length);
-		byte[] appidBytes = appId.getBytes(CHARSET);
+		byte[] appidBytes = getAppId().getBytes(CHARSET);
 
 		// randomStr + networkBytesOrder + text + appId
 		byteCollector.addBytes(randomStrBytes);
@@ -105,8 +107,8 @@ public class WXBizMsgCrypt {
 		try {
 			// 设置加密模式为AES的CBC模式
 			Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
-			SecretKeySpec keySpec = new SecretKeySpec(aesKey, "AES");
-			IvParameterSpec iv = new IvParameterSpec(aesKey, 0, 16);
+			SecretKeySpec keySpec = new SecretKeySpec(getAesKey(), "AES");
+			IvParameterSpec iv = new IvParameterSpec(getAesKey(), 0, 16);
 			cipher.init(Cipher.ENCRYPT_MODE, keySpec, iv);
 
 			// 加密
@@ -134,8 +136,8 @@ public class WXBizMsgCrypt {
 		try {
 			// 设置解密模式为AES的CBC模式
 			Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
-			SecretKeySpec key_spec = new SecretKeySpec(aesKey, "AES");
-			IvParameterSpec iv = new IvParameterSpec(Arrays.copyOfRange(aesKey, 0, 16));
+			SecretKeySpec key_spec = new SecretKeySpec(getAesKey(), "AES");
+			IvParameterSpec iv = new IvParameterSpec(Arrays.copyOfRange(getAesKey(), 0, 16));
 			cipher.init(Cipher.DECRYPT_MODE, key_spec, iv);
 
 			// 使用BASE64对密文进行解码
@@ -167,7 +169,7 @@ public class WXBizMsgCrypt {
 		}
 
 		// appid不相同的情况
-		if (!from_corpid.equals(appId)) {
+		if (!from_corpid.equals(getAppId())) {
 			throw new AesException(AesException.ValidateCorpidError);
 		}
 		return xmlContent;
@@ -198,7 +200,7 @@ public class WXBizMsgCrypt {
 			timeStamp = Long.toString(System.currentTimeMillis());
 		}
 
-		String signature = SHA1.getSHA1(token, timeStamp, nonce, encrypt);
+		String signature = SHA1.getSHA1(getToken(), timeStamp, nonce, encrypt);
 
 		// 生成发送的xml
 		EncryptedReplyMessage result = new EncryptedReplyMessage();
@@ -231,7 +233,7 @@ public class WXBizMsgCrypt {
 		// 提取密文
 
 		// 验证安全签名
-		String signature = SHA1.getSHA1(token, timeStamp, nonce, postData);
+		String signature = SHA1.getSHA1(getToken(), timeStamp, nonce, postData);
 
 		// 和URL中的签名比较是否相等
 		if (!signature.equals(msgSignature)) {
@@ -259,7 +261,7 @@ public class WXBizMsgCrypt {
 			return "";
 		}
 		
-		String signature = SHA1.getSHA1(token, timestamp, nonce, echoStr);
+		String signature = SHA1.getSHA1(getToken(), timestamp, nonce, echoStr);
 
 		if (!signature.equals(msgSignature)) {
 			throw new AesException(AesException.ValidateSignatureError);
